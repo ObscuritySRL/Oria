@@ -1,0 +1,9 @@
+(*
+  CHAR
+*)
+
+function char.lower():string;
+begin exit(lowerCase(self));end;
+
+function char.upper():string;
+begin exit(upperCase(self));end;

@@ -1,0 +1,45 @@
+(*
+  TPOINT
+*)
+
+function tPoint.distance(vPoint:tPoint):integer;
+begin exit(round(sqrt(pow(self.x-vPoint.x,2)+pow(self.y-vPoint.y,2))));end;
+
+function tPoint.inside(vBox:tBox):boolean;
+begin exit(pointInBox(self,vBox));end;
+
+function tPoint.inside(vPoints:tPointArray):boolean;overload;
+var
+  _Index,
+    _IndexMinus:integer;
+begin
+  _IndexMinus:=high(vPoints);
+  for _Index to _IndexMinus do
+  begin
+    if ((vPoints[_Index].y>self.y)<>(vPoints[_IndexMinus].y>self.y)) and (self.x<(vPoints[_IndexMinus].x-vPoints[_Index].x)*(self.y-vPoints[_Index].y)/(vPoints[_IndexMinus].y-vPoints[_Index].y)+vPoints[_Index].x) then
+      result:=not result;
+    _IndexMinus:=_Index;
+  end;
+  exit(result);
+end;
+
+procedure tPoint.mouse(vAction:string);
+begin
+  case lowercase(vAction) of
+    'down':       scrollMouse(self.x,self.y,1);
+    'left':       clickMouse(self.x,self.y,1);
+    'move':       moveMouse(self.x,self.y);
+    'right':      clickMouse(self.x,self.y,0);
+    'up':         scrollMouse(self.x,self.y,-1);
+  end;
+end;
+
+function tPoint.offset(vProperty:string):integer;
+var _Point:^tPoint;
+begin
+  case lowercase(vProperty) of
+    'x':  exit(ptrUInt(@_Point^.x));
+    'y':  exit(ptrUInt(@_Point^.y));
+    else  exit(-1);
+  end;
+end;

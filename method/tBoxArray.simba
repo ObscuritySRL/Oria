@@ -1,0 +1,109 @@
+(*
+  TBOXARRAY
+*)
+
+function tBoxArray.empty():boolean;
+begin exit(length(self)=0);end;
+
+function tBoxArray.eq(vIndex:integer):tBox;
+begin
+  if vIndex<length(self) then
+    exit(self[vIndex]);
+end;
+
+function tBoxArray.find(vProperty:string;vValues:integer):tBoxArray;
+begin exit(self.find(vProperty,[vValues]));end;
+
+function tBoxArray.find(vProperty:string;vValues:tIntegerArray):tBoxArray;overload;
+function compareAll(vValue:integer;vValues:tIntegerArray):boolean;
+var _Index:integer;
+begin
+  for _Index to high(vValues) do
+    if vValue=vValues[_Index] then
+      exit(true);
+end;
+function compareRange(vValue:integer;vValues:tIntegerArray):boolean;
+begin exit((vValue>=vValues[0]) and (vValue<=vValues[high(vValues)]));end;
+var
+  _BoxCount,
+    _BoxIndex,
+    _BoxOffset,
+    _ValuesCount,
+    _ValuesIndex:integer;
+  _BoxPointer:pointer;
+  _FunctionCompare:function(vValue:integer;vValues:tIntegerArray):boolean=@compareAll;
+begin
+  if (_BoxCount:=self.indexes()) then
+    if (_BoxOffset:=tBox.offset(vProperty))<>-1 then
+      if (_ValuesCount:=vValues.indexes()) then
+      begin
+        if vValues.range() then
+          _FunctionCompare:=@compareRange;
+        _BoxPointer:=pointer(self)+_BoxOffset;
+        setLength(result,_BoxCount);
+        for 0 to _BoxCount-1 do
+        begin
+          if _FunctionCompare(integer(_BoxPointer^),vValues) then
+          begin
+            result[_BoxIndex]:=tBox((_BoxPointer-_BoxOffset)^);
+            _BoxIndex+=1;
+          end;
+          _BoxPointer+=ogl.size.box;
+        end;
+        setLength(result,_BoxIndex);
+        exit(result);
+      end;
+end;
+
+function tBoxArray.first():tBox;
+begin
+  if not self.empty() then
+    exit(self[0]);
+end;
+
+function tBoxArray.indexes():integer;
+begin exit(length(self));end;
+
+function tBoxArray.last():tBox;
+begin
+  if not self.empty() then
+    exit(self[high(self)]);
+end;
+
+function tBoxArray.reverse():tBoxArray;
+var
+  _Decrease,
+    _Increase:integer;
+begin
+  setLength(result,length(self));
+  for _Decrease:=high(self) downTo 0 do
+  begin
+    result[_Increase]:=self[_Decrease];
+    _Increase+=1;
+  end;
+  exit(result);
+end;
+
+function tBoxArray.x1(vX1:integer):tBoxArray;
+begin exit(self.find('x1',[vX1]));end;
+
+function tBoxArray.x1(vX1s:tIntegerArray):tBoxArray;overload;
+begin exit(self.find('x1',vX1s));end;
+
+function tBoxArray.x2(vX2:integer):tBoxArray;
+begin exit(self.find('x2',[vX2]));end;
+
+function tBoxArray.x2(vX2s:tIntegerArray):tBoxArray;overload;
+begin exit(self.find('x2',vX2s));end;
+
+function tBoxArray.y1(vY1:integer):tBoxArray;
+begin exit(self.find('y1',[vY1]));end;
+
+function tBoxArray.y1(vY1s:tIntegerArray):tBoxArray;overload;
+begin exit(self.find('y1',vY1s));end;
+
+function tBoxArray.y2(vY2:integer):tBoxArray;
+begin exit(self.find('y2',[vY2]));end;
+
+function tBoxArray.y2(vY2s:tIntegerArray):tBoxArray;overload;
+begin exit(self.find('y2',vY2s));end;

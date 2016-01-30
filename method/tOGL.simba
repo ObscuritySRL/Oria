@@ -1,0 +1,135 @@
+(*
+  TOGL
+*)
+
+function tOGL.call(vProcedure:string;vDebug:boolean=false):boolean;
+begin exit(self.call(getGlobalPtr(vProcedure),vDebug));end;
+
+function tOGL.call(vProcedure:procedure;vDebug:boolean=false):boolean;overload;
+var _Procedure:string;
+begin
+  if (_Procedure:=getGlobalName(@vProcedure))<>'' then
+  begin
+    writeLN(ogl.uptime(),' | ',ogl.script(),' > ',_Procedure,'()');
+    vProcedure();
+    exit(true);
+  end;
+end;
+
+function tOGL.characters(vUpdate:boolean=false):tCharacters;
+var
+  _CharacterCount,
+    _CharacterIndex:integer;
+  _CharacterPointer:^tCharacter;
+begin
+  if vUpdate or ogl.cache.character.empty() then
+  begin
+    _CharacterPointer:=nil; (* REPLACE *)
+    setLength(self.cache.character,_CharacterCount);
+    for _CharacterIndex to _CharacterCount-1 do
+    begin
+      ogl.cache.character[_CharacterIndex]:=_CharacterPointer^;
+      _CharacterPointer+=ogl.size.character;
+    end;
+  end;
+  exit(self.characters);
+end;
+
+procedure tOGL.debug(vDebug:string;vClear:boolean=false);
+var _Message:string;
+begin
+  if vDebug<>'' then
+  begin
+    if vClear then
+      clearDebug();
+    vDebug:=(_Message:=ogl.uptime()+' | '+ogl.script()+' > ')+replace(vDebug,#13#10,#13#10+_Message,[0]);
+  end;
+  writeLN(vDebug);
+end;
+
+function tOGL.download(vURL:string;vDebug:boolean=false):string;
+function readString(vMemoryStruct:proMemoryStruct):string;
+begin
+  setLength(result,vMemoryStruct.size);
+  memMove(vMemoryStruct.memory^,result[1],vMemoryStruct.size);
+end;
+var
+  _Response:proMemoryStruct;
+  _Socket:sslSocket;
+begin
+  if vDebug then
+    writeLN(ogl.uptime(),' | ',ogl.script(),' > download > ',vURL);
+  try
+    _Socket.init();
+    _Socket.setURLFollow(true);
+    _Socket.setURL(vURL);
+    _Socket.doGet(_Response);
+    result:=readString(_Response);
+  finally
+    _Socket.free();
+  end;
+  exit(result);
+end;
+
+function tOGL.load(vSection,vName:string;vDefault:variant):variant;
+begin
+  result:=readINI(vSection,vName,includePath+'\ogLib-2\ogLib.ini');
+  if toStr(result)='' then
+    result:=vDefault;
+  exit(result);
+end;
+
+function tOGL.models(vUpdate:boolean=false):tModels;
+var
+  _ModelCount,
+    _ModelIndex:integer;
+  _ModelPointer:^tModel;
+begin
+  if vUpdate or ogl.cache.model.empty() then
+  begin
+    _ModelPointer:=nil; (* REPLACE *)
+    setLength(self.models,_ModelCount);
+    for _ModelIndex to _ModelCount-1 do
+    begin
+      ogl.cache.model[_ModelIndex]:=_ModelPointer^;
+      _ModelPointer+=ogl.size.model;
+    end;
+  end;
+  exit(self.models);
+end;
+
+function tOGL.save(vSection,vName:string;vValue:variant):variant;
+begin
+  writeINI(vSection,vName,toStr(vValue),includePath+'\ogLib-2\ogLib.ini');
+  exit(vValue);
+end;
+
+function tOGL.script():string;
+begin exit(replaceRegExpr('(?i)([\w\s\-]+)\.simba',scriptFile,'$1',true));end;
+
+function tOGL.setup():boolean;
+begin
+
+end;
+
+function tOGL.textures(vUpdate:boolean=false):tTextures;
+var
+  _TextureCount,
+    _TextureIndex:integer;
+  _TexturePointer:^tTexture;
+begin
+  if vUpdate or ogl.cache.texture.empty() then
+  begin
+    _TexturePointer:=nil; (* REPLACE *)
+    setLength(self.textures,_TextureCount);
+    for _TextureIndex to _TextureCount-1 do
+    begin
+      ogl.cache.texture[_TextureIndex]:=_TexturePointer^;
+      _TexturePointer+=ogl.size.texture;
+    end;
+  end;
+  exit(self.textures);
+end;
+
+function tOGL.uptime():string;
+begin exit(formatDateTime('tt',getTimeRunning()/100000000));end;

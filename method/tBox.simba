@@ -1,0 +1,42 @@
+(*
+  TBOX
+*)
+
+function tBox.equals(vBox:tBox):boolean;
+begin exit(compareMem(@self,@vBox,sizeOf(tBox)));end;
+
+function tBox.offset(vProperty:string):integer;
+var _Box:^tBox;
+begin
+  case lowercase(vProperty) of
+    'x1': exit(ptrUInt(@_Box^.x1));
+    'x2': exit(ptrUInt(@_Box^.x2));
+    'y1': exit(ptrUInt(@_Box^.y1));
+    'y2': exit(ptrUInt(@_Box^.y2));
+    else  exit(-1);
+  end;
+end;
+
+procedure tBox.mouse(vAction:string);
+begin self.point().mouse(vAction);end;
+
+function tBox.inside(vBox:tBox):boolean;
+begin exit(self.points().inside(vBox));end;
+
+function tBox.inside(vPoints:tPointArray):boolean;overload;
+begin exit(self.points().inside(vPoints));end;
+
+function tBox.point():tPoint;
+begin exit(tPoint([random(self.x1,self.x2),random(self.y1,self.y2)]));end;
+
+function tBox.points():tPointArray;
+begin exit(tPointArray([[self.x1,self.y1],[self.x2,self.y1],[self.x1,self.y2],[self.x2,self.y2]]));end;{Prevents strange access violations}
+
+function tBox.positon():tPoint;
+begin exit(middleBox(self));end;
+
+function tBox.transform(vX,vY:integer):tBox;
+begin exit(self.transform(vX,vY,vX,vY));end;
+
+function tBox.transform(vX1,vY1,vX2,vY2:integer):tBox;overload;
+begin exit(tBox([self.x1+vX1,self.y1+vY1,self.x2+vX2,self.y2+vY2]));end;

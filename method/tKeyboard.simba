@@ -1,0 +1,206 @@
+(*
+  TKEYBOARD
+*)
+
+function tKeyboard.code(vKey:string):integer;
+begin
+  if length(vKey)>1 then
+    case lowercase(vKey) of
+      'backspace':        exit(8);
+      'ctrl','control':   exit(17);
+      'del','delete':     exit(46);
+      'down':             exit(40);
+      'end':              exit(35);
+      'enter','return':   exit(13);
+      'esc','escape':     exit(27);
+      'f1':               exit(112);
+      'f2':               exit(113);
+      'f3':               exit(114);
+      'f4':               exit(115);
+      'f5':               exit(116);
+      'f6':               exit(117);
+      'f7':               exit(118);
+      'f8':               exit(119);
+      'f9':               exit(120);
+      'f10':              exit(121);
+      'f11':              exit(122);
+      'f12':              exit(123);
+      'f13':              exit(124);
+      'f14':              exit(125);
+      'f15':              exit(126);
+      'home':             exit(36);
+      'insert':           exit(45);
+      'left':             exit(37);
+      'right':            exit(39);
+      'shift':            exit(16);
+      'space','spacebar': exit(32);
+      'tab':              exit(9);
+      'up':               exit(38);
+      else                exit(0);
+    end
+  else
+    exit(getKeyCode(vKey[1]));
+end;
+
+function tKeyboard.format(vString:string):string;
+var
+  _Code,
+    _Option:variant;
+  _Index:integer=1;
+  _Key:byte;
+  _Button,
+  _Escaped:boolean;
+  _ButtonString:string;
+begin
+  for _Index to length(vString) do
+  begin
+    case vString[_Index] of
+      '\':
+        if _Escaped then
+        begin
+          _Escaped:=false;
+          if _Button then
+            _ButtonString:=_ButtonString+'\'
+          else
+            result:=result+'{220}';
+        end
+        else
+          _Escaped:=true;
+      '{':
+        if _Escaped then
+        begin
+          _Escaped:=false;
+          if not _Button then
+            result:=result+'{123}';
+        end
+        else if _Button then
+          raiseException(20,'Invalid string: '+vString)
+        else
+        begin
+          _Button:=true;
+          _ButtonString:='';
+        end;
+      '}':
+        if _Escaped then
+        begin
+          _Escaped:=false;
+          if _Button then
+            _ButtonString:=_ButtonString+'}'
+          else
+            result:=result+'{221}';
+        end
+        else if _Button then
+        begin
+          _Button:=false;
+          if execRegexpr('(?i)^([a-z]+|f\d[0-5]?|[^a-z])( (\d+|down|up))?$',_ButtonString) then
+            result:=result+'{'+
+              replace(
+                _ButtonString,
+                _Code:=replaceRegExpr('(?i)^([a-z]+|\d[0-5]?|[^a-z])( \d+| down| up)?$',_ButtonString,'$1',true),
+                toStr(self.code(_Code)),
+                [0]
+              )+'}';
+        end
+        else
+          raiseException(20,'Invalid string: '+vString);
+      else
+        begin
+          _Escaped:=false;
+          if _Button then
+            _ButtonString:=_ButtonString+vString[_Index]
+          else
+            result:=result+'{'+toStr(self.code(vString[_Index]))+'}';
+        end;
+    end;
+  end;
+  if _Button then
+    raiseException(20,'Invalid string: '+vString);
+  exit(result);
+end;
+
+function tKeyboard.formatted(vString:string):boolean;
+begin exit(execRegExpr('(?i)^(\{\d+( \d+| down| up)?\})+$',vString));end;
+
+procedure tKeyboard.press(vKey:variant;vOption:variant='');
+var
+  _Index,
+    _Key,
+    _Option,
+    _Speed:integer;
+  _KeyPress:procedure(vWord:word);
+begin
+  case varType(vKey) of
+    varByte,varInteger:
+      if vKey<>0 then
+        case varType(vOption) of
+          varInteger:
+            for _Index:=1 to integer(vOption) do
+              self.press(vKey);
+          varString:
+            if (_Option:=strToIntDef(vOption,-1))=-1 then
+            begin
+              case lowercase(vOption) of
+                '':_KeyPress:=@pressKey;
+                'down':_KeyPress:=@keyDown;
+                'up':_KeyPress:=@keyUp;
+              end;
+              if @_KeyPress<>nil then
+              begin
+                _KeyPress(vKey);
+                wait(round(self.speed*random()));
+              end;
+            end
+            else
+              self.press(vKey,_Option);
+        end;
+    varString:
+      self.press(self.code(vKey),vOption);
+  end;
+end;
+
+procedure tKeyboard.send(vString:string);
+var
+  _Button,
+    _String:tStringArray;
+  _ButtonIndex,
+    _Presses:integer;
+begin
+  vString:=self.format(vString);
+  _String:=multiBetween(vString,'{','}');
+  for _ButtonIndex to high(_String) do
+  begin
+    _Button:=explode(' ',_String[_ButtonIndex]);
+    if length(_Button)=1 then
+      self.press(strToInt(_Button[0]))
+    else
+      self.press(strToInt(_Button[0]),_Button[1])
+  end;
+end;
+
+function tKeyboard.state(vKey:variant):boolean;
+begin
+  case varType(vKey) of
+    varByte,varInteger:
+      if vKey<>0 then
+        exit(isKeyDown(vKey));
+    varString:
+      exit(self.state(self.code(vKey)));
+  end;
+end;
+
+function tKeyboard.wait(vKey:variant;vFunction:string;vTimeout:integer=1000):boolean;
+var
+  _CountDown:tCountDown;
+  _Function:function():boolean;
+begin
+  _Function:=getGlobalPtr(vFunction);
+  if execRegExpr('(?i)^function\(\):\(false=0, true=1\) \("'+vFunction+'"::0x[a-z0-9]+\)$',toStr(@_Function)) then
+  begin
+    self.press(vKey,'down');
+    _CountDown.start(vTimeout);
+    while (not _Function()) and (not _CountDown.finished()) do
+      continue;
+    self.press(vKey,'up');
+  end;
+  exit(not _CountDown.finished());
+end;

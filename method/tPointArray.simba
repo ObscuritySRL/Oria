@@ -1,0 +1,115 @@
+(*
+  TPOINTARRAY
+*)
+
+function tPointArray.empty():boolean;
+begin exit(length(self)=0);end;
+
+function tPointArray.eq(vIndex:integer):tPoint;
+begin
+  if vIndex<length(self) then
+    exit(self[vIndex]);
+end;
+
+function tPointArray.find(vProperty:string;vValues:integer):tPointArray;
+begin exit(self.find(vProperty,[vValues]));end;
+
+function tPointArray.find(vProperty:string;vValues:tIntegerArray):tPointArray;overload;
+function compareAll(vValue:integer;vValues:tIntegerArray):boolean;
+var _Index:integer;
+begin
+  for _Index to high(vValues) do
+    if vValue=vValues[_Index] then
+      exit(true);
+end;
+function compareRange(vValue:integer;vValues:tIntegerArray):boolean;
+begin exit((vValue>=vValues[0]) and (vValue<=vValues[high(vValues)]));end;
+var
+  _PointCount,
+    _PointIndex,
+    _PointOffset,
+    _ValuesCount,
+    _ValuesIndex:integer;
+  _PointPointer:pointer;
+  _FunctionCompare:function(vValue:integer;vValues:tIntegerArray):boolean=@compareAll;
+begin
+  if (_PointCount:=self.indexes()) then
+    if (_PointOffset:=tPoint.offset(vProperty))<>-1 then
+      if (_ValuesCount:=vValues.indexes()) then
+      begin
+        if vValues.range() then
+          _FunctionCompare:=@compareRange;
+        _PointPointer:=pointer(self)+_PointOffset;
+        setLength(result,_PointCount);
+        for 0 to _PointCount-1 do
+        begin
+          if _FunctionCompare(integer(_PointPointer^),vValues) then
+          begin
+            result[_PointIndex]:=tPoint((_PointPointer-_PointOffset)^);
+            _PointIndex+=1;
+          end;
+          _PointPointer+=ogl.size.point;
+        end;
+        setLength(result,_PointIndex);
+        exit(result);
+      end;
+end;
+
+function tPointArray.first():tPoint;
+begin
+  if not self.empty() then
+    exit(self[0]);
+end;
+
+function tPointArray.indexes():integer;
+begin exit(length(self));end;
+
+function tPointArray.inside(vBox:tBox):boolean;
+var _Index:integer;
+begin
+  for _Index to high(self) do
+    if not self[_Index].inside(vBox) then
+      exit(false);
+  exit(true);
+end;
+
+function tPointArray.inside(vPoints:tPointArray):boolean;overload;
+var _Index:integer;
+begin
+  for _Index to high(self) do
+    if not self[_Index].inside(vPoints) then
+      exit(false);
+  exit(true);
+end;
+
+function tPointArray.last():tPoint;
+begin
+  if not self.empty() then
+    exit(self[high(self)]);
+end;
+
+function tPointArray.reverse():tPointArray;
+var
+  _Decrease,
+    _Increase:integer;
+begin
+  setLength(result,length(self));
+  for _Decrease:=high(self) downTo 0 do
+  begin
+    result[_Increase]:=self[_Decrease];
+    _Increase+=1;
+  end;
+  exit(result);
+end;
+
+function tPointArray.x(vX:integer):tPointArray;
+begin exit(self.find('x',[vX]));end;
+
+function tPointArray.x(vXs:tIntegerArray):tPointArray;overload;
+begin exit(self.find('x',vXs));end;
+
+function tPointArray.y(vY:integer):tPointArray;
+begin exit(self.find('y',[vY]));end;
+
+function tPointArray.y(vYs:tIntegerArray):tPointArray;overload;
+begin exit(self.find('y',vYs));end;

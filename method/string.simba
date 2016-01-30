@@ -1,0 +1,38 @@
+(*
+  STRING
+*)
+
+function string.lower():string;
+begin exit(lowerCase(self));end;
+
+function string.parse(vType:char):string;
+var _Expression:string;
+begin
+  case vType of
+    'd':_Expression:='[^0-9]';      {Numeric}
+    'D':_Expression:='[0-9]';       {Not numeric}
+    'p':_Expression:='[^A-Za-z]';   {Alphabetic}
+    'P':_Expression:='[A-Za-z]';    {Not alphabetic}
+    'w':_Expression:='[^0-9A-Za-z]';{Alphanumeric}
+    'W':_Expression:='[0-9A-Za-z]'; {Not alphanumeric}
+  end;
+  if _Expression<>'' then
+    exit(replaceRegExpr(_Expression,self,'',false));
+end;
+
+function string.reverse():string;
+var
+  _Decrease,
+    _Increase:integer=1;
+begin
+  setLength(result,length(self));
+  for _Decrease:=length(self) downTo 1 do
+  begin
+    result[_Increase]:=self[_Decrease];
+    _Increase+=1;
+  end;
+  exit(result);
+end;
+
+function string.upper():string;
+begin exit(upperCase(self));end;

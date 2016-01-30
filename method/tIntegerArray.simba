@@ -1,0 +1,107 @@
+(*
+  TINTEGERARRAY
+*)
+
+function tIntegerArray.contains(vInteger:integer):boolean;
+var _Index:integer;
+begin
+  for _Index to high(self) do
+    if self[_Index]=vInteger then
+      exit(true)
+end;
+
+function tIntegerArray.empty():boolean;
+begin exit(length(self)=0);end;
+
+function tIntegerArray.eq(vIndex:integer):integer;
+begin
+  if vIndex<length(self) then
+    exit(self[vIndex]);
+end;
+
+function tIntegerArray.find(vValue:integer):tIntegerArray;
+begin exit(self.find([vValue]));end;
+
+function tIntegerArray.find(vValues:tIntegerArray):tIntegerArray;overload;
+function compareAll(vValue:integer;vValues:tIntegerArray):boolean;
+var _Index:integer;
+begin
+  for _Index to high(vValues) do
+    if vValue=vValues[_Index] then
+      exit(true);
+end;
+function compareRange(vValue:integer;vValues:tIntegerArray):boolean;
+begin exit((vValue>=vValues[0]) and (vValue<=vValues[high(vValues)]));end;
+var
+  _FunctionCompare:function(vValue:integer;vValues:tIntegerArray):boolean=@compareAll;
+  _IntegerCount,
+    _IntegerIndex,
+    _ResultIndex:integer;
+begin
+  if (_IntegerCount:=self.indexes()) then
+    if vValues.indexes() then
+    begin
+      if vValues.range() then
+        _FunctionCompare:=@compareRange;
+      setLength(result,_IntegerCount);
+      for _IntegerIndex to _IntegerCount-1 do
+        if _FunctionCompare(self[_IntegerIndex],vValues) then
+        begin
+          result[_ResultIndex]:=self[_IntegerIndex];
+          _ResultIndex+=1;
+        end;
+      setLength(result,_ResultIndex);
+      exit(result);
+    end;
+end;
+
+function tIntegerArray.first():integer;
+begin
+  if not self.empty() then
+    exit(self[0]);
+end;
+
+function tIntegerArray.indexes():integer;
+begin exit(length(self));end;
+
+function tIntegerArray.range():boolean;
+var _Index:integer;
+begin
+  for _Index to high(self)-1 do
+    if self[_Index]<>self[_Index+1]-1 then
+      break;
+  exit((self.indexes()>1) and (_Index=high(self)));
+end;
+
+function tIntegerArray.range(vMinimum,vMaximum:integer):tIntegerArray;overload;
+var
+  _Index,
+    _Maximum,
+    _Minimum:integer;
+begin
+  _Minimum:=min(vMinimum,vMaximum);
+  _Maximum:=max(vMinimum,vMaximum);
+  setLength(result,_Maximum-_Minimum+1);
+  for _Index to _Maximum-_Minimum do
+    result[_Index]:=_Minimum+_Index;
+end;
+
+function tIntegerArray.last():integer;
+begin
+  if not self.empty() then
+    exit(self[high(self)]);
+end;
+
+function tIntegerArray.reverse():tIntegerArray;
+var
+  _Decrease,
+    _Increase:integer;
+begin
+  setLength(result,length(self));
+  for _Decrease:=high(self) downTo 0 do
+  begin
+    result[_Increase]:=self[_Decrease];
+    _Increase+=1;
+  end;
+  exit(result);
+end;

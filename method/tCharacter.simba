@@ -1,0 +1,60 @@
+(*
+  TCHARACTER
+*)
+
+function tCharacter.debug(vClear:boolean=false):tCharacter;
+begin
+  if vClear then
+    clearDebug();
+  writeLN(ogl.uptime(),' | ',ogl.script(),' > tCharacter > ',self);
+  exit(self);
+end;
+
+function tCharacter.distance(vPoint:tPoint):integer;
+begin exit(self.position.distance(vPoint));end;
+
+function tCharacter.equals(vCharacter:tCharacter):boolean;
+begin exit(compareMem(@self,@vCharacter,ogl.size.character));end;
+
+function tCharacter.inside(vBox:tBox;vBounds:boolean=false):boolean;
+begin
+  if vBounds then
+    exit(self.bounds.inside(vBox))
+  else
+    exit(self.position.inside(vBox));
+end;
+
+function tCharacter.inside(vPoints:tPointArray;vBounds:boolean=false):boolean;overload;
+begin
+  if vBounds then
+    exit(self.bounds.inside(vPoints))
+  else
+    exit(self.position.inside(vPoints));
+end;
+
+procedure tCharacter.mouse(vAction:string);
+begin self.bounds.point().mouse(vAction);end;
+
+function tCharacter.offset(vProperty:string):integer;
+var _Character:^tCharacter;
+begin
+  case lowercase(vProperty) of
+    'bounds':       exit(ptrUInt(@_Character^.bounds));
+      'bounds.x1':  exit(ptrUInt(@_Character^.bounds.x1));
+      'bounds.x2':  exit(ptrUInt(@_Character^.bounds.x2));
+      'bounds.y1':  exit(ptrUInt(@_Character^.bounds.y1));
+      'bounds.y2':  exit(ptrUInt(@_Character^.bounds.y2));
+    'color':        exit(ptrUInt(@_Character^.color));
+    'height':       exit(ptrUInt(@_Character^.height));
+    'id':           exit(ptrUInt(@_Character^.id));
+    'letter':       exit(ptrUInt(@_Character^.letter));
+    'position':     exit(ptrUInt(@_Character^.position));
+      'position.x': exit(ptrUInt(@_Character^.position.x));
+      'position.y': exit(ptrUInt(@_Character^.position.y));
+    'width':        exit(ptrUInt(@_Character^.width));
+    else            raiseException(20,'Invalid property: tCharacter.'+vProperty);
+  end;
+end;
+
+function tCharacter.point():tPoint;
+begin exit(self.bounds.point());end;

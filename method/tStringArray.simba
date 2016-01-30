@@ -1,0 +1,84 @@
+(*
+  TSTRINGARRAY
+*)
+
+function tStringArray.contains(vString:string):boolean;
+var _Index:integer;
+begin
+  for _Index to high(self) do
+    if self[_Index]=vString then
+      exit(true)
+end;
+
+function tStringArray.empty():boolean;
+begin exit(length(self)=0);end;
+
+function tStringArray.eq(vIndex:integer):string;
+begin
+  if vIndex<length(self) then
+    exit(self[vIndex]);
+end;
+
+function tStringArray.find(vString:string):tStringArray;
+begin exit(self.find([vString]));end;
+
+function tStringArray.find(vStrings:tStringArray):tStringArray;overload;
+function compareAll(vString:string;vStrings:tStringArray):boolean;
+var _Index:integer;
+begin
+  for _Index to high(vStrings) do
+    if vString=vStrings[_Index] then
+      exit(true);
+end;
+var
+  _ResultIndex,
+    _StringCount,
+    _StringIndex:integer;
+  _String:string;
+begin
+  if (_StringCount:=self.indexes()) then
+    if vStrings.indexes() then
+    begin
+      setLength(result,_StringCount);
+      for _StringIndex to _StringCount-1 do
+      begin
+        _String:=self[_StringIndex]; {Prevents strange access violations}
+        if compareAll(_String,vStrings) then
+        begin
+          result[_ResultIndex]:=_String;
+          _ResultIndex+=1;
+        end;
+      end;
+      setLength(result,_ResultIndex);
+      exit(result);
+    end;
+end;
+
+function tStringArray.first():string;
+begin
+  if not self.empty() then
+    exit(self[0]);
+end;
+
+function tStringArray.indexes():integer;
+begin exit(length(self));end;
+
+function tStringArray.last():string;
+begin
+  if not self.empty() then
+    exit(self[high(self)]);
+end;
+
+function tStringArray.reverse():tStringArray;
+var
+  _Decrease,
+    _Increase:integer;
+begin
+  setLength(result,length(self));
+  for _Decrease:=high(self) downTo 0 do
+  begin
+    result[_Increase]:=self[_Decrease];
+    _Increase+=1;
+  end;
+  exit(result);
+end;

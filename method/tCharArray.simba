@@ -1,0 +1,38 @@
+(*
+  TCHARARRAY
+*)
+
+function tCharArray.empty():boolean;
+begin exit(length(self)=0);end;
+
+function tCharArray.eq(vIndex:integer):char;
+begin
+  if vIndex<length(self) then
+    exit(self[vIndex]);
+end;
+
+function tCharArray.indexes():integer;
+begin exit(length(self));end;
+
+function tCharArray.integerArray():tIntegerArray;
+var _Index:integer;
+begin
+  setLength(result,length(self));
+  for _Index to high(self) do
+    result[_Index]:=byte(self[_Index]);
+  exit(result);
+end;
+
+function tCharArray.reverse():tCharArray;
+var
+  _Decrease,
+    _Increase:integer;
+begin
+  setLength(result,length(self));
+  for _Decrease:=high(self) downTo 0 do
+  begin
+    result[_Increase]:=self[_Decrease];
+    _Increase+=1;
+  end;
+  exit(result);
+end;

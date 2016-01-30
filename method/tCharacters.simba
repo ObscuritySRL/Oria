@@ -1,0 +1,158 @@
+(*
+  TCHARACTERS
+*)
+
+function tCharacters.boundsX1(vBoundsX1:integer):tCharacters;
+begin exit(self.find('bounds.x1',vBoundsX1));end;
+
+function tCharacters.boundsX1(vBoundsX1s:tIntegerArray):tCharacters;overload;
+begin exit(self.find('bounds.x1',vBoundsX1s));end;
+
+function tCharacters.boundsX2(vBoundsX2:integer):tCharacters;
+begin exit(self.find('bounds.x2',vBoundsX2));end;
+
+function tCharacters.boundsX2(vBoundsX2s:tIntegerArray):tCharacters;overload;
+begin exit(self.find('bounds.x2',vBoundsX2s));end;
+
+function tCharacters.boundsY1(vBoundsY1:integer):tCharacters;
+begin exit(self.find('bounds.y1',vBoundsY1));end;
+
+function tCharacters.boundsY1(vBoundsY1s:tIntegerArray):tCharacters;overload;
+begin exit(self.find('bounds.y1',vBoundsY1s));end;
+
+function tCharacters.boundsY2(vBoundsY2:integer):tCharacters;
+begin exit(self.find('bounds.y2',vBoundsY2));end;
+
+function tCharacters.boundsY2(vBoundsY2s:tIntegerArray):tCharacters;overload;
+begin exit(self.find('bounds.y2',vBoundsY2s));end;
+
+function tCharacters.color(vColor:integer):tCharacters;
+begin exit(self.find('color',vColor));end;
+
+function tCharacters.color(vColors:tIntegerArray):tCharacters;overload;
+begin exit(self.find('color',vColors));end;
+
+function tCharacters.empty():boolean;
+begin exit(length(self)=0);end;
+
+function tCharacters.eq(vIndex:integer):tCharacter;
+begin
+  if vIndex<self.indexes() then
+    exit(self[vIndex]);
+end;
+
+function tCharacters.find(vProperty:string;vValue:integer):tCharacters;
+begin exit(self.find(vProperty,[vValue]));end;
+
+function tCharacters.find(vProperty:string;vValues:tIntegerArray):tCharacters;overload;
+function compareAll(vValue:integer;vValues:tIntegerArray):boolean;
+var _Index:integer;
+begin
+  for _Index to high(vValues) do
+    if vValue=vValues[_Index] then
+      exit(true);
+end;
+function compareRange(vValue:integer;vValues:tIntegerArray):boolean;
+begin exit((vValue>=vValues[0]) and (vValue<=vValues[high(vValues)]));end;
+function readByte(vPointer:pointer):integer;
+begin exit(byte(vPointer^));end;
+function readInteger(vPointer:pointer):integer;
+begin exit(integer(vPointer^));end;
+var
+  _FunctionCompare:function(vValue:integer;vValues:tIntegerArray):boolean=@compareAll;
+  _FunctionRead:function(vPointer:pointer):integer;
+  _CharacterCount,
+    _CharacterIndex,
+    _CharacterOffset:integer;
+  _CharacterPointer:pointer;
+begin
+  if (_CharacterCount:=self.indexes()) then
+    if (_CharacterOffset:=tCharacter.offset(vProperty))<>-1 then
+      if vValues.indexes() then
+      begin
+        if vValues.range() then
+          _FunctionCompare:=@compareRange;
+        case lowercase(vProperty) of
+          'letter': _FunctionRead:=@readByte;
+          else      _FunctionRead:=@readInteger;
+        end;
+        _CharacterPointer:=pointer(self)+_CharacterOffset;
+        setLength(result,_CharacterCount);
+        for 0 to _CharacterCount-1 do
+        begin
+          if _FunctionCompare(_FunctionRead(_CharacterPointer),vValues) then
+          begin
+            result[_CharacterIndex]:=tCharacter((_CharacterPointer-_CharacterOffset)^);
+            _CharacterIndex+=1;
+          end;
+          _CharacterPointer+=ogl.size.character;
+        end;
+        setLength(result,_CharacterIndex);
+        exit(result);
+      end;
+end;
+
+function tCharacters.first():tCharacter;
+begin
+  if not self.empty() then
+    exit(self[0]);
+end;
+
+function tCharacters.height(vHeight:integer):tCharacters;
+begin exit(self.find('height',vHeight));end;
+
+function tCharacters.height(vHeights:tIntegerArray):tCharacters;overload;
+begin exit(self.find('height',vHeights));end;
+
+function tCharacters.id(vID:integer):tCharacters;
+begin exit(self.find('id',vID));end;
+
+function tCharacters.id(vIDs:tIntegerArray):tCharacters;overload;
+begin exit(self.find('id',vIDs));end;
+
+function tCharacters.indexes():integer;
+begin exit(length(self));end;
+
+function tCharacters.last():tCharacter;
+begin
+  if not self.empty() then
+    exit(self[high(self)]);
+end;
+
+function tCharacters.letter(vLetter:char):tCharacters;
+begin exit(self.find('letter',byte(vLetter)));end;
+
+function tCharacters.letter(vLetters:tCharArray):tCharacters;overload;
+begin exit(self.find('letter',vLetters.integerArray()));end;
+
+function tCharacters.positionX(vPositionX:integer):tCharacters;
+begin exit(self.find('position.x',vPositionX));end;
+
+function tCharacters.positionX(vPositionXs:tIntegerArray):tCharacters;overload;
+begin exit(self.find('position.x',vPositionXs));end;
+
+function tCharacters.positionY(vPositionY:integer):tCharacters;
+begin exit(self.find('position.y',vPositionY));end;
+
+function tCharacters.positionY(vPositionYs:tIntegerArray):tCharacters;overload;
+begin exit(self.find('position.y',vPositionYs));end;
+
+function tCharacters.reverse():tCharacters;
+var
+  _Decrease,
+    _Increase:integer;
+begin
+  setLength(result,length(self));
+  for _Decrease:=high(self) downTo 0 do
+  begin
+    result[_Increase]:=self[_Decrease];
+    _Increase+=1;
+  end;
+  exit(result);
+end;
+
+function tCharacters.width(vWidth:integer):tCharacters;
+begin exit(self.find('width',vWidth));end;
+
+function tCharacters.width(vWidths:tIntegerArray):tCharacters;overload;
+begin exit(self.find('width',vWidths));end;

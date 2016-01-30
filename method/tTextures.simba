@@ -1,0 +1,143 @@
+(*
+  TTEXTURES
+*)
+
+function tTextures.boundsX1(vBoundsX1:integer):tTextures;
+begin exit(self.find('bounds.x1',vBoundsX1));end;
+
+function tTextures.boundsX1(vBoundsX1s:tIntegerArray):tTextures;overload;
+begin exit(self.find('bounds.x1',vBoundsX1s));end;
+
+function tTextures.boundsX2(vBoundsX2:integer):tTextures;
+begin exit(self.find('bounds.x2',vBoundsX2));end;
+
+function tTextures.boundsX2(vBoundsX2s:tIntegerArray):tTextures;overload;
+begin exit(self.find('bounds.x2',vBoundsX2s));end;
+
+function tTextures.boundsY1(vBoundsY1:integer):tTextures;
+begin exit(self.find('bounds.y1',vBoundsY1));end;
+
+function tTextures.boundsY1(vBoundsY1s:tIntegerArray):tTextures;overload;
+begin exit(self.find('bounds.y1',vBoundsY1s));end;
+
+function tTextures.boundsY2(vBoundsY2:integer):tTextures;
+begin exit(self.find('bounds.y2',vBoundsY2));end;
+
+function tTextures.boundsY2(vBoundsY2s:tIntegerArray):tTextures;overload;
+begin exit(self.find('bounds.y2',vBoundsY2s));end;
+
+function tTextures.color(vColor:integer):tTextures;
+begin exit(self.find('color',vColor));end;
+
+function tTextures.color(vColors:tIntegerArray):tTextures;overload;
+begin exit(self.find('color',vColors));end;
+
+function tTextures.empty():boolean;
+begin exit(length(self)=0);end;
+
+function tTextures.eq(vIndex:integer):tTexture;
+begin
+  if vIndex<self.indexes() then
+    exit(self[vIndex]);
+end;
+
+function tTextures.find(vProperty:string;vValue:integer):tTextures;
+begin exit(self.find(vProperty,[vValue]));end;
+
+function tTextures.find(vProperty:string;vValues:tIntegerArray):tTextures;overload;
+function compareAll(vValue:integer;vValues:tIntegerArray):boolean;
+var _Index:integer;
+begin
+  for _Index to high(vValues) do
+    if vValue=vValues[_Index] then
+      exit(true);
+end;
+function compareRange(vValue:integer;vValues:tIntegerArray):boolean;
+begin exit((vValue>=vValues[0]) and (vValue<=vValues[high(vValues)]));end;
+var
+  _FunctionCompare:function(vValue:integer;vValues:tIntegerArray):boolean=@compareAll;
+  _TextureCount,
+    _TextureIndex,
+    _TextureOffset:integer;
+  _TexturePointer:pointer;
+begin
+  if (_TextureCount:=self.indexes()) then
+    if (_TextureOffset:=tTexture.offset(vProperty))<>-1 then
+      if vValues.indexes() then
+      begin
+        if vValues.range() then
+          _FunctionCompare:=@compareRange;
+        _TexturePointer:=pointer(self)+_TextureOffset;
+        setLength(result,_TextureCount);
+        for 0 to _TextureCount-1 do
+        begin
+          if _FunctionCompare(integer(_TexturePointer^),vValues) then
+          begin
+            result[_TextureIndex]:=tTexture((_TexturePointer-_TextureOffset)^);
+            _TextureIndex+=1;
+          end;
+          _TexturePointer+=ogl.size.texture;
+        end;
+        setLength(result,_TextureIndex);
+        exit(result);
+      end;
+end;
+
+function tTextures.first():tTexture;
+begin
+  if not self.empty() then
+    exit(self[0]);
+end;
+
+function tTextures.height(vHeight:integer):tTextures;
+begin exit(self.find('height',vHeight));end;
+
+function tTextures.height(vHeights:tIntegerArray):tTextures;overload;
+begin exit(self.find('height',vHeights));end;
+
+function tTextures.id(vID:integer):tTextures;
+begin exit(self.find('id',vID));end;
+
+function tTextures.id(vIDs:tIntegerArray):tTextures;overload;
+begin exit(self.find('id',vIDs));end;
+
+function tTextures.indexes():integer;
+begin exit(length(self));end;
+
+function tTextures.last():tTexture;
+begin
+  if not self.empty() then
+    exit(self[high(self)]);
+end;
+
+function tTextures.positionX(vPositionX:integer):tTextures;
+begin exit(self.find('position.x',vPositionX));end;
+
+function tTextures.positionX(vPositionXs:tIntegerArray):tTextures;overload;
+begin exit(self.find('position.x',vPositionXs));end;
+
+function tTextures.positionY(vPositionY:integer):tTextures;
+begin exit(self.find('position.y',vPositionY));end;
+
+function tTextures.positionY(vPositionYs:tIntegerArray):tTextures;overload;
+begin exit(self.find('position.y',vPositionYs));end;
+
+function tTextures.reverse():tTextures;
+var
+  _Decrease,
+    _Increase:integer;
+begin
+  setLength(result,length(self));
+  for _Decrease:=high(self) downTo 0 do
+  begin
+    result[_Increase]:=self[_Decrease];
+    _Increase+=1;
+  end;
+  exit(result);
+end;
+
+function tTextures.width(vWidth:integer):tTextures;
+begin exit(self.find('width',vWidth));end;
+
+function tTextures.width(vWidths:tIntegerArray):tTextures;overload;
+begin exit(self.find('width',vWidths));end;

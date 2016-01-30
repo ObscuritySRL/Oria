@@ -1,0 +1,59 @@
+(*
+  TTEXTURE
+*)
+
+function tTexture.debug(vClear:boolean=false):tTexture;
+begin
+  if vClear then
+    clearDebug();
+  writeLN(ogl.uptime(),' | ',ogl.script(),' > tTexture > ',self);
+  exit(self);
+end;
+
+function tTexture.distance(vPoint:tPoint):integer;
+begin exit(self.position.distance(vPoint));end;
+
+function tTexture.equals(vTexture:tTexture):boolean;
+begin exit(compareMem(@self,@vTexture,ogl.size.texture));end;
+
+function tTexture.inside(vBox:tBox;vBounds:boolean=false):boolean;
+begin
+  if vBounds then
+    exit(self.bounds.inside(vBox))
+  else
+    exit(self.position.inside(vBox));
+end;
+
+function tTexture.inside(vPoints:tPointArray;vBounds:boolean=false):boolean;overload;
+begin
+  if vBounds then
+    exit(self.bounds.inside(vPoints))
+  else
+    exit(self.position.inside(vPoints));
+end;
+
+procedure tTexture.mouse(vAction:string);
+begin self.bounds.point().mouse(vAction);end;
+
+function tTexture.offset(vProperty:string):integer;
+var _Texture:^tTexture;
+begin
+  case lowercase(vProperty) of
+    'bounds':       exit(ptrUInt(@_Texture^.bounds));
+      'bounds.x1':  exit(ptrUInt(@_Texture^.bounds.x1));
+      'bounds.x2':  exit(ptrUInt(@_Texture^.bounds.x2));
+      'bounds.y1':  exit(ptrUInt(@_Texture^.bounds.y1));
+      'bounds.y2':  exit(ptrUInt(@_Texture^.bounds.y2));
+    'color':        exit(ptrUInt(@_Texture^.color));
+    'height':       exit(ptrUInt(@_Texture^.height));
+    'id':           exit(ptrUInt(@_Texture^.id));
+    'position':     exit(ptrUInt(@_Texture^.position));
+      'position.x': exit(ptrUInt(@_Texture^.position.x));
+      'position.y': exit(ptrUInt(@_Texture^.position.y));
+    'width':        exit(ptrUInt(@_Texture^.width));
+    else            raiseException(20,'Invalid property: tTexture.'+vProperty);
+  end;
+end;
+
+function tTexture.point():tPoint;
+begin exit(self.bounds.point());end;

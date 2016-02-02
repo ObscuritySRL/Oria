@@ -18,7 +18,15 @@ begin
 end;
 
 procedure tBox.mouse(vAction:string);
-begin self.point().mouse(vAction);end;
+begin
+  case lowercase(vAction) of
+    'down':       ogl.mouse.down(self);
+    'left':       ogl.mouse.left(self);
+    'move':       ogl.mouse.move(self);
+    'right':      ogl.mouse.right(self);
+    'up':         ogl.mouse.up(self);
+  end;
+end;
 
 function tBox.inside(vBox:tBox):boolean;
 begin exit(self.points().inside(vBox));end;

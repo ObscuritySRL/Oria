@@ -33,7 +33,9 @@ end;
 
 type tModels=array of tModel;
 
-type tMouse=boolean;
+type tMouse=record
+  speed:                            integer;
+end;
 
 type tTexture=record
   bounds:                           tBox;
@@ -90,15 +92,20 @@ end;
 type tOGL=record
   cache:                            tOGLCache;
   controls:                         tOGLControl;
+  keyboard:                         tKeyboard;
+  mouse:                            tMouse;
   size:                             tOGLSize;
 end;
 
 var
-  keyboard:                         tKeyboard;
-  mouse:                            tMouse;
   ogl:                              tOGL;
 
+{$i method\tMouse.simba}
+{$i method\tKeyboard.simba}
+
 {$i method\char.simba}
+{$i method\integer.simba}
+{$i method\pointer.simba}
 {$i method\string.simba}
 {$i method\tBox.simba}
 {$i method\tBoxArray.simba}
@@ -121,33 +128,32 @@ var
 {$i method\tTextures.simba}
 
 
-{$i method\tMouse.simba}
-{$i method\tKeyboard.simba}
-
 
 begin
   clearDebug();
 
-  keyboard.speed:=                  ogl.load('keyboard',            'speed',    180);
-
   (* Not used by RS3 defaults: q e y f z [ ] f ; ' z x c v , . / *)
   (*             ...continued: insert home delete end            *)
 
-  ogl.controls.actions.familiar:=     ogl.load('controls.actions',  'familiar', 'f');
-  ogl.controls.actions.heal:=         ogl.load('controls.actions',  'heal',     '');
-  ogl.controls.actions.prayer:=       ogl.load('controls.actions',  'prayer',   '');
-  ogl.controls.actions.retaliate:=    ogl.load('controls.actions',  'retaliate','');
-  ogl.controls.actions.run:=          ogl.load('controls.actions',  'run',      'r');
-  ogl.controls.actions.special:=      ogl.load('controls.actions',  'special',  '');
-  ogl.controls.interfaces.backpack:= ogl.load('controls.interfaces','backpack', 'b');
-  ogl.controls.interfaces.defence:=  ogl.load('controls.interfaces','defence',  'k');
-  ogl.controls.interfaces.magic:=    ogl.load('controls.interfaces','magic',    'u');
-  ogl.controls.interfaces.melee:=    ogl.load('controls.interfaces','melee',    'i');
-  ogl.controls.interfaces.prayer:=   ogl.load('controls.interfaces','prayer',   'p');
-  ogl.controls.interfaces.ranged:=   ogl.load('controls.interfaces','ranged',   'o');
-  ogl.controls.interfaces.skill:=    ogl.load('controls.interfaces','skill',    'h');
-  ogl.controls.interfaces.task:=     ogl.load('controls.interfaces','task',     'j');
-  ogl.controls.interfaces.worn:=     ogl.load('controls.interfaces','worn',     'n');
+  ogl.controls.actions.familiar:=   ogl.load('controls.actions',    'familiar', 'f');
+  ogl.controls.actions.heal:=       ogl.load('controls.actions',    'heal',     '');
+  ogl.controls.actions.prayer:=     ogl.load('controls.actions',    'prayer',   '');
+  ogl.controls.actions.retaliate:=  ogl.load('controls.actions',    'retaliate','');
+  ogl.controls.actions.run:=        ogl.load('controls.actions',    'run',      'r');
+  ogl.controls.actions.special:=    ogl.load('controls.actions',    'special',  '');
+  ogl.controls.interfaces.backpack:=ogl.load('controls.interfaces', 'backpack', 'b');
+  ogl.controls.interfaces.defence:= ogl.load('controls.interfaces', 'defence',  'k');
+  ogl.controls.interfaces.magic:=   ogl.load('controls.interfaces', 'magic',    'u');
+  ogl.controls.interfaces.melee:=   ogl.load('controls.interfaces', 'melee',    'i');
+  ogl.controls.interfaces.prayer:=  ogl.load('controls.interfaces', 'prayer',   'p');
+  ogl.controls.interfaces.ranged:=  ogl.load('controls.interfaces', 'ranged',   'o');
+  ogl.controls.interfaces.skill:=   ogl.load('controls.interfaces', 'skill',    'h');
+  ogl.controls.interfaces.task:=    ogl.load('controls.interfaces', 'task',     'j');
+  ogl.controls.interfaces.worn:=    ogl.load('controls.interfaces', 'worn',     'n');
+
+  ogl.keyboard.speed:=              ogl.load('keyboard',            'speed',    200);
+
+  ogl.mouse.speed:=                 ogl.load('mouse',               'speed',    350);
 
   ogl.size.box:=                    sizeOf(tBox);
   ogl.size.character:=              sizeOf(tCharacter);

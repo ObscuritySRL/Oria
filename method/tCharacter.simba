@@ -52,7 +52,7 @@ begin
       'position.x': exit(ptrUInt(@_Character^.position.x));
       'position.y': exit(ptrUInt(@_Character^.position.y));
     'width':        exit(ptrUInt(@_Character^.width));
-    else            raiseException(20,'Invalid property: tCharacter.'+vProperty);
+    else            exit(-1);
   end;
 end;
 

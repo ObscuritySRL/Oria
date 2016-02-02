@@ -1,11 +1,15 @@
+(*
+  TCOUNTDOWN
+*)
+
 function tCountDown.finished():boolean;
 begin exit(getSystemTime()>=self);end;
-
-function tCountDown.start(vTime:integer):integer;
-begin exit(self:=getSystemTime()+vTime);end;
 
 function tCountDown.remaining():integer;
 begin
   if not self.finished() then
     exit(self-getSystemTime());
 end;
+
+function tCountDown.start(vTime:integer):integer;
+begin exit(self:=getSystemTime()+vTime);end;

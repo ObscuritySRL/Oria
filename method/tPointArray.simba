@@ -2,12 +2,54 @@
   TPOINTARRAY
 *)
 
+function tPointArray.concat(vPoints:tPointArray):tPointArray;
+begin
+  insert(self,vPoints);
+  exit(vPoints);
+end;
+
+function tPointArray.contains(vPoint:tPoint):boolean;
+var _Index:integer;
+begin
+  for _Index to high(self) do
+    if compareMem(@self[_Index],@vPoint,ogl.size.point) then
+      exit(true);
+end;
+
+function tPointArray.convex():tPointArray;
+function crossProduct(vPoint1,vPoint2,vPoint3:tPoint):integer;
+begin exit((vPoint2.x-vPoint1.x)*(vPoint3.y-vPoint1.y)-(vPoint2.y-vPoint1.y)*(vPoint3.x-vPoint1.x));end;
+var
+  _Index:integer;
+  _Lower,
+    _Upper,
+    _Points:tPointArray;
+begin
+  _Points:=self;
+  sortTPAByX(_Points,false);
+  for _Index:=0 to high(_Points) do
+  begin
+    while (_Lower.indexes()>=2) and (crossProduct(_Lower[_Lower.indexes()-2],_Lower[_Lower.indexes()-1],_Points[_Index])<=0) do
+      _Lower.pop();
+    _Lower.push(_Points[_Index]);
+  end;
+  _Lower.pop();
+  for _Index:=high(_Points) downTo 0 do
+  begin
+    while (_Upper.indexes()>=2) and (crossProduct(_Upper[_Upper.indexes()-2],_Upper[_Upper.indexes()-1],_Points[_Index])<=0) do
+      _Upper.pop();
+    _Upper.push(_Points[_Index]);
+  end;
+  _Upper.pop();
+  exit(_Lower.concat(_Upper));
+end;
+
 function tPointArray.empty():boolean;
-begin exit(length(self)=0);end;
+begin exit(self.indexes()=0);end;
 
 function tPointArray.eq(vIndex:integer):tPoint;
 begin
-  if vIndex<length(self) then
+  if vIndex<self.indexes() then
     exit(self[vIndex]);
 end;
 
@@ -25,17 +67,15 @@ end;
 function compareRange(vValue:integer;vValues:tIntegerArray):boolean;
 begin exit((vValue>=vValues[0]) and (vValue<=vValues[high(vValues)]));end;
 var
+  _FunctionCompare:function(vValue:integer;vValues:tIntegerArray):boolean=@compareAll;
   _PointCount,
     _PointIndex,
-    _PointOffset,
-    _ValuesCount,
-    _ValuesIndex:integer;
+    _PointOffset:integer;
   _PointPointer:pointer;
-  _FunctionCompare:function(vValue:integer;vValues:tIntegerArray):boolean=@compareAll;
 begin
   if (_PointCount:=self.indexes()) then
     if (_PointOffset:=tPoint.offset(vProperty))<>-1 then
-      if (_ValuesCount:=vValues.indexes()) then
+      if not vValues.empty() then
       begin
         if vValues.range() then
           _FunctionCompare:=@compareRange;
@@ -88,17 +128,44 @@ begin
     exit(self[high(self)]);
 end;
 
+function tPointArray.pop():tPoint;
+var _High:integer;
+begin
+  if not self.empty() then
+  begin
+    result:=self[_High:=high(self)];
+    setLength(self,_High);
+    exit(result);
+  end;
+end;
+
+function tPointArray.push(vPoint:tPoint):integer;
+var _Length:integer;
+begin
+  setLength(self,(_Length:=self.indexes())+1);
+  self[_Length]:=vPoint;
+  exit(_Length+1);
+end;
+
 function tPointArray.reverse():tPointArray;
 var
   _Decrease,
     _Increase:integer;
 begin
-  setLength(result,length(self));
+  setLength(result,self.indexes());
   for _Decrease:=high(self) downTo 0 do
   begin
     result[_Increase]:=self[_Decrease];
     _Increase+=1;
   end;
+  exit(result);
+end;
+
+function tPointArray.shuffle():tPointArray;
+var _Index:integer;
+begin
+  for _Index:=high(result:=self) downto 0 do
+    system.swap(result[_Index],result[random(_Index+1)]);
   exit(result);
 end;
 

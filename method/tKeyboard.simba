@@ -98,7 +98,7 @@ begin
                 _ButtonString,
                 _Code:=replaceRegExpr('(?i)^([a-z]+|\d[0-5]?|[^a-z])( \d+| down| up)?$',_ButtonString,'$1',true),
                 toStr(self.code(_Code)),
-                [0]
+                [rfReplaceAll]
               )+'}';
         end
         else
@@ -147,7 +147,7 @@ begin
               if @_KeyPress<>nil then
               begin
                 _KeyPress(vKey);
-                wait(round(self.speed*random()));
+                wait(self.speed.normal());
               end;
             end
             else

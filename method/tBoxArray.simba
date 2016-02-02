@@ -2,12 +2,26 @@
   TBOXARRAY
 *)
 
+function tBoxArray.concat(vBoxes:tBoxArray):tBoxArray;
+begin
+  insert(self,vBoxes);
+  exit(vBoxes);
+end;
+
+function tBoxArray.contains(vBox:tBox):boolean;
+var _Index:integer;
+begin
+  for _Index to high(self) do
+    if compareMem(@self[_Index],@vBox,ogl.size.box) then
+      exit(true);
+end;
+
 function tBoxArray.empty():boolean;
-begin exit(length(self)=0);end;
+begin exit(self.indexes()=0);end;
 
 function tBoxArray.eq(vIndex:integer):tBox;
 begin
-  if vIndex<length(self) then
+  if vIndex<self.indexes() then
     exit(self[vIndex]);
 end;
 
@@ -27,15 +41,13 @@ begin exit((vValue>=vValues[0]) and (vValue<=vValues[high(vValues)]));end;
 var
   _BoxCount,
     _BoxIndex,
-    _BoxOffset,
-    _ValuesCount,
-    _ValuesIndex:integer;
+    _BoxOffset:integer;
   _BoxPointer:pointer;
   _FunctionCompare:function(vValue:integer;vValues:tIntegerArray):boolean=@compareAll;
 begin
   if (_BoxCount:=self.indexes()) then
     if (_BoxOffset:=tBox.offset(vProperty))<>-1 then
-      if (_ValuesCount:=vValues.indexes()) then
+      if not vValues.empty() then
       begin
         if vValues.range() then
           _FunctionCompare:=@compareRange;
@@ -70,17 +82,44 @@ begin
     exit(self[high(self)]);
 end;
 
+function tBoxArray.pop():tBox;
+var _High:integer;
+begin
+  if not self.empty() then
+  begin
+    result:=self[_High:=high(self)];
+    setLength(self,_High);
+    exit(result);
+  end;
+end;
+
+function tBoxArray.push(vBox:tBox):integer;
+var _Length:integer;
+begin
+  setLength(self,(_Length:=self.indexes())+1);
+  self[_Length]:=vBox;
+  exit(_Length+1);
+end;
+
 function tBoxArray.reverse():tBoxArray;
 var
   _Decrease,
     _Increase:integer;
 begin
-  setLength(result,length(self));
+  setLength(result,self.indexes());
   for _Decrease:=high(self) downTo 0 do
   begin
     result[_Increase]:=self[_Decrease];
     _Increase+=1;
   end;
+  exit(result);
+end;
+
+function tBoxArray.shuffle():tBoxArray;
+var _Index:integer;
+begin
+  for _Index:=high(result:=self) downto 0 do
+    system.swap(result[_Index],result[random(_Index+1)]);
   exit(result);
 end;
 

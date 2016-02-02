@@ -33,7 +33,15 @@ begin
 end;
 
 procedure tTexture.mouse(vAction:string);
-begin self.bounds.point().mouse(vAction);end;
+var
+  _Position:tPoint;
+begin
+  _Position:=ogl.mouse.position();
+  if _Position.inside(self.bounds) and (random(50)<>0) then
+    _Position.mouse(vAction)
+  else
+    self.point().mouse(vAction);
+end;
 
 function tTexture.offset(vProperty:string):integer;
 var _Texture:^tTexture;
@@ -51,7 +59,7 @@ begin
       'position.x': exit(ptrUInt(@_Texture^.position.x));
       'position.y': exit(ptrUInt(@_Texture^.position.y));
     'width':        exit(ptrUInt(@_Texture^.width));
-    else            raiseException(20,'Invalid property: tTexture.'+vProperty);
+    else            exit(-1);
   end;
 end;
 

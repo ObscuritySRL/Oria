@@ -32,8 +32,22 @@ begin exit(self.find('color',vColor));end;
 function tTextures.color(vColors:tIntegerArray):tTextures;overload;
 begin exit(self.find('color',vColors));end;
 
+function tTextures.concat(vTextures:tTextures):tTextures;
+begin
+  insert(self,vTextures);
+  exit(vTextures);
+end;
+
+function tTextures.contains(vTexture:tTexture):boolean;
+var _Index:integer;
+begin
+  for _Index to high(self) do
+    if compareMem(@self[_Index],@vTexture,ogl.size.texture) then
+      exit(true);
+end;
+
 function tTextures.empty():boolean;
-begin exit(length(self)=0);end;
+begin exit(self.indexes()=0);end;
 
 function tTextures.eq(vIndex:integer):tTexture;
 begin
@@ -63,7 +77,7 @@ var
 begin
   if (_TextureCount:=self.indexes()) then
     if (_TextureOffset:=tTexture.offset(vProperty))<>-1 then
-      if vValues.indexes() then
+      if not vValues.empty() then
       begin
         if vValues.range() then
           _FunctionCompare:=@compareRange;
@@ -110,6 +124,23 @@ begin
     exit(self[high(self)]);
 end;
 
+procedure tTextures.mouse(vAction:string);
+begin
+  if not self.empty() then
+    self[0].bounds.mouse(vAction);
+end;
+
+function tTextures.pop():tTexture;
+var _High:integer;
+begin
+  if not self.empty() then
+  begin
+    result:=self[_High:=high(self)];
+    setLength(self,_High);
+    exit(result);
+  end;
+end;
+
 function tTextures.positionX(vPositionX:integer):tTextures;
 begin exit(self.find('position.x',vPositionX));end;
 
@@ -122,17 +153,33 @@ begin exit(self.find('position.y',vPositionY));end;
 function tTextures.positionY(vPositionYs:tIntegerArray):tTextures;overload;
 begin exit(self.find('position.y',vPositionYs));end;
 
+function tTextures.push(vTexture:tTexture):integer;
+var _Length:integer;
+begin
+  setLength(self,(_Length:=self.indexes())+1);
+  self[_Length]:=vTexture;
+  exit(_Length+1);
+end;
+
 function tTextures.reverse():tTextures;
 var
   _Decrease,
     _Increase:integer;
 begin
-  setLength(result,length(self));
+  setLength(result,self.indexes());
   for _Decrease:=high(self) downTo 0 do
   begin
     result[_Increase]:=self[_Decrease];
     _Increase+=1;
   end;
+  exit(result);
+end;
+
+function tTextures.shuffle():tTextures;
+var _Index:integer;
+begin
+  for _Index:=high(result:=self) downto 0 do
+    system.swap(result[_Index],result[random(_Index+1)]);
   exit(result);
 end;
 

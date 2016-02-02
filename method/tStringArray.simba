@@ -2,6 +2,12 @@
   TSTRINGARRAY
 *)
 
+function tStringArray.concat(vStrings:tStringArray):tStringArray;
+begin
+  insert(self,vStrings);
+  exit(vStrings);
+end;
+
 function tStringArray.contains(vString:string):boolean;
 var _Index:integer;
 begin
@@ -11,11 +17,11 @@ begin
 end;
 
 function tStringArray.empty():boolean;
-begin exit(length(self)=0);end;
+begin exit(self.indexes()=0);end;
 
 function tStringArray.eq(vIndex:integer):string;
 begin
-  if vIndex<length(self) then
+  if vIndex<self.indexes() then
     exit(self[vIndex]);
 end;
 
@@ -23,29 +29,20 @@ function tStringArray.find(vString:string):tStringArray;
 begin exit(self.find([vString]));end;
 
 function tStringArray.find(vStrings:tStringArray):tStringArray;overload;
-function compareAll(vString:string;vStrings:tStringArray):boolean;
-var _Index:integer;
-begin
-  for _Index to high(vStrings) do
-    if vString=vStrings[_Index] then
-      exit(true);
-end;
 var
-  _ResultIndex,
-    _StringCount,
-    _StringIndex:integer;
-  _String:string;
+  _StringIndex,
+    _ResultIndex:integer;
+    _String:string;
 begin
-  if (_StringCount:=self.indexes()) then
-    if vStrings.indexes() then
+  if (not self.empty()) and (not vStrings.empty()) then
     begin
-      setLength(result,_StringCount);
-      for _StringIndex to _StringCount-1 do
+      setLength(result,self.indexes());
+      for _StringIndex to self.indexes()-1 do
       begin
-        _String:=self[_StringIndex]; {Prevents strange access violations}
-        if compareAll(_String,vStrings) then
+        _String:=self[_StringIndex];
+        if vStrings.contains(_String) then
         begin
-          result[_ResultIndex]:=_String;
+          result[_ResultIndex]:=_String;{Prevents strange access violations}
           _ResultIndex+=1;
         end;
       end;
@@ -69,16 +66,43 @@ begin
     exit(self[high(self)]);
 end;
 
+function tStringArray.pop():string;
+var _High:integer;
+begin
+  if not self.empty() then
+  begin
+    result:=self[_High:=high(self)];
+    setLength(self,_High);
+    exit(result);
+  end;
+end;
+
+function tStringArray.push(vString:string):integer;
+var _Length:integer;
+begin
+  setLength(self,(_Length:=self.indexes())+1);
+  self[_Length]:=vString;
+  exit(_Length+1);
+end;
+
 function tStringArray.reverse():tStringArray;
 var
   _Decrease,
     _Increase:integer;
 begin
-  setLength(result,length(self));
+  setLength(result,self.indexes());
   for _Decrease:=high(self) downTo 0 do
   begin
     result[_Increase]:=self[_Decrease];
     _Increase+=1;
   end;
+  exit(result);
+end;
+
+function tStringArray.shuffle():tStringArray;
+var _Index:integer;
+begin
+  for _Index:=high(result:=self) downto 0 do
+    system.swap(result[_Index],result[random(_Index+1)]);
   exit(result);
 end;

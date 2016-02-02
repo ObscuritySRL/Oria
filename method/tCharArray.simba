@@ -2,25 +2,96 @@
   TCHARARRAY
 *)
 
+function tCharArray.concat(vChars:tCharArray):tCharArray;
+begin
+  insert(self,vChars);
+  exit(vChars);
+end;
+
+function tCharArray.contains(vChar:char):boolean;
+var _Index:integer;
+begin
+  for _Index to high(self) do
+    if self[_Index]=vChar then
+      exit(true);
+end;
+
 function tCharArray.empty():boolean;
-begin exit(length(self)=0);end;
+begin exit(self.indexes()=0);end;
 
 function tCharArray.eq(vIndex:integer):char;
 begin
-  if vIndex<length(self) then
+  if vIndex<self.indexes() then
     exit(self[vIndex]);
+end;
+
+function tCharArray.find(vChar:char):tCharArray;
+begin exit(self.find([vChar]));end;
+
+function tCharArray.find(vChars:tCharArray):tCharArray;overload;
+var
+  _CharIndex,
+    _ResultIndex:integer;
+    _Char:char;
+begin
+  if (not self.empty()) and (not vChars.empty()) then
+    begin
+      setLength(result,self.indexes());
+      for _CharIndex to self.indexes()-1 do
+      begin
+        _Char:=self[_CharIndex];
+        if vChars.contains(_Char) then
+        begin
+          result[_ResultIndex]:=_Char;{Prevents strange access violations}
+          _ResultIndex+=1;
+        end;
+      end;
+      setLength(result,_ResultIndex);
+      exit(result);
+    end;
+end;
+
+function tCharArray.first():char;
+begin
+  if not self.empty() then
+    exit(self[0]);
 end;
 
 function tCharArray.indexes():integer;
 begin exit(length(self));end;
 
-function tCharArray.integerArray():tIntegerArray;
+function tCharArray.integers():tIntegerArray;
 var _Index:integer;
 begin
-  setLength(result,length(self));
+  setLength(result,self.indexes());
   for _Index to high(self) do
     result[_Index]:=byte(self[_Index]);
   exit(result);
+end;
+
+function tCharArray.last():char;
+begin
+  if not self.empty() then
+    exit(self[high(self)]);
+end;
+
+function tCharArray.pop():char;
+var _High:integer;
+begin
+  if not self.empty() then
+  begin
+    result:=self[_High:=high(self)];
+    setLength(self,_High);
+    exit(result);
+  end;
+end;
+
+function tCharArray.push(vChar:char):integer;
+var _Length:integer;
+begin
+  setLength(self,(_Length:=self.indexes())+1);
+  self[_Length]:=vChar;
+  exit(_Length+1);
 end;
 
 function tCharArray.reverse():tCharArray;
@@ -28,7 +99,7 @@ var
   _Decrease,
     _Increase:integer;
 begin
-  setLength(result,length(self));
+  setLength(result,self.indexes());
   for _Decrease:=high(self) downTo 0 do
   begin
     result[_Increase]:=self[_Decrease];

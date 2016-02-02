@@ -2,54 +2,57 @@
   TINTEGERARRAY
 *)
 
+function tIntegerArray.concat(vIntegers:tIntegerArray):tIntegerArray;
+begin
+  insert(self,vIntegers);
+  exit(vIntegers);
+end;
+
 function tIntegerArray.contains(vInteger:integer):boolean;
 var _Index:integer;
 begin
   for _Index to high(self) do
     if self[_Index]=vInteger then
-      exit(true)
+      exit(true);
 end;
 
 function tIntegerArray.empty():boolean;
-begin exit(length(self)=0);end;
+begin exit(self.indexes()=0);end;
 
 function tIntegerArray.eq(vIndex:integer):integer;
 begin
-  if vIndex<length(self) then
+  if vIndex<self.indexes() then
     exit(self[vIndex]);
 end;
 
-function tIntegerArray.find(vValue:integer):tIntegerArray;
-begin exit(self.find([vValue]));end;
+function tIntegerArray.find(vInteger:integer):tIntegerArray;
+begin exit(self.find([vInteger]));end;
 
-function tIntegerArray.find(vValues:tIntegerArray):tIntegerArray;overload;
-function compareAll(vValue:integer;vValues:tIntegerArray):boolean;
-var _Index:integer;
-begin
-  for _Index to high(vValues) do
-    if vValue=vValues[_Index] then
-      exit(true);
-end;
-function compareRange(vValue:integer;vValues:tIntegerArray):boolean;
-begin exit((vValue>=vValues[0]) and (vValue<=vValues[high(vValues)]));end;
+function tIntegerArray.find(vIntegers:tIntegerArray):tIntegerArray;overload;
+function compareAll(vInteger:integer;vIntegers:tIntegerArray):boolean;
+begin exit(vIntegers.contains(vInteger));end;
+function compareRange(vInteger:integer;vIntegers:tIntegerArray):boolean;
+begin exit((vInteger>=vIntegers[0]) and (vInteger<=vIntegers[high(vIntegers)]));end;
 var
   _FunctionCompare:function(vValue:integer;vValues:tIntegerArray):boolean=@compareAll;
-  _IntegerCount,
+  _Integer,
     _IntegerIndex,
     _ResultIndex:integer;
 begin
-  if (_IntegerCount:=self.indexes()) then
-    if vValues.indexes() then
+    if (not self.empty()) and (not vIntegers.empty()) then
     begin
-      if vValues.range() then
+      if vIntegers.range() then
         _FunctionCompare:=@compareRange;
-      setLength(result,_IntegerCount);
-      for _IntegerIndex to _IntegerCount-1 do
-        if _FunctionCompare(self[_IntegerIndex],vValues) then
+      setLength(result,self.indexes());
+      for _IntegerIndex to self.indexes()-1 do
+      begin
+        _Integer:=self[_IntegerIndex];
+        if _FunctionCompare(_Integer,vIntegers) then
         begin
-          result[_ResultIndex]:=self[_IntegerIndex];
+          result[_ResultIndex]:=_Integer;{Prevents strange access violations}
           _ResultIndex+=1;
         end;
+      end;
       setLength(result,_ResultIndex);
       exit(result);
     end;
@@ -63,6 +66,25 @@ end;
 
 function tIntegerArray.indexes():integer;
 begin exit(length(self));end;
+
+function tIntegerArray.pop():integer;
+var _High:integer;
+begin
+  if not self.empty() then
+  begin
+    result:=self[_High:=high(self)];
+    setLength(self,_High);
+    exit(result);
+  end;
+end;
+
+function tIntegerArray.push(vInteger:integer):integer;
+var _Length:integer;
+begin
+  setLength(self,(_Length:=self.indexes())+1);
+  self[_Length]:=vInteger;
+  exit(_Length+1);
+end;
 
 function tIntegerArray.range():boolean;
 var _Index:integer;
@@ -97,11 +119,19 @@ var
   _Decrease,
     _Increase:integer;
 begin
-  setLength(result,length(self));
+  setLength(result,self.indexes());
   for _Decrease:=high(self) downTo 0 do
   begin
     result[_Increase]:=self[_Decrease];
     _Increase+=1;
   end;
+  exit(result);
+end;
+
+function tIntegerArray.shuffle():tIntegerArray;
+var _Index:integer;
+begin
+  for _Index:=high(result:=self) downto 0 do
+    system.swap(result[_Index],result[random(_Index+1)]);
   exit(result);
 end;

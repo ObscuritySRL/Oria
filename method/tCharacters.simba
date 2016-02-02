@@ -32,8 +32,22 @@ begin exit(self.find('color',vColor));end;
 function tCharacters.color(vColors:tIntegerArray):tCharacters;overload;
 begin exit(self.find('color',vColors));end;
 
+function tCharacters.concat(vCharacters:tCharacters):tCharacters;
+begin
+  insert(self,vCharacters);
+  exit(vCharacters);
+end;
+
+function tCharacters.contains(vCharacter:tCharacter):boolean;
+var _Index:integer;
+begin
+  for _Index to high(self) do
+    if compareMem(@self[_Index],@vCharacter,ogl.size.character) then
+      exit(true);
+end;
+
 function tCharacters.empty():boolean;
-begin exit(length(self)=0);end;
+begin exit(self.indexes()=0);end;
 
 function tCharacters.eq(vIndex:integer):tCharacter;
 begin
@@ -68,7 +82,7 @@ var
 begin
   if (_CharacterCount:=self.indexes()) then
     if (_CharacterOffset:=tCharacter.offset(vProperty))<>-1 then
-      if vValues.indexes() then
+      if not vValues.empty() then
       begin
         if vValues.range() then
           _FunctionCompare:=@compareRange;
@@ -123,7 +137,24 @@ function tCharacters.letter(vLetter:char):tCharacters;
 begin exit(self.find('letter',byte(vLetter)));end;
 
 function tCharacters.letter(vLetters:tCharArray):tCharacters;overload;
-begin exit(self.find('letter',vLetters.integerArray()));end;
+begin exit(self.find('letter',vLetters.integers()));end;
+
+procedure tCharacters.mouse(vAction:string);
+begin
+  if not self.empty() then
+    self[0].bounds.mouse(vAction);
+end;
+
+function tCharacters.pop():tCharacter;
+var _High:integer;
+begin
+  if not self.empty() then
+  begin
+    result:=self[_High:=high(self)];
+    setLength(self,_High);
+    exit(result);
+  end;
+end;
 
 function tCharacters.positionX(vPositionX:integer):tCharacters;
 begin exit(self.find('position.x',vPositionX));end;
@@ -137,17 +168,33 @@ begin exit(self.find('position.y',vPositionY));end;
 function tCharacters.positionY(vPositionYs:tIntegerArray):tCharacters;overload;
 begin exit(self.find('position.y',vPositionYs));end;
 
+function tCharacters.push(vCharacter:tCharacter):integer;
+var _Length:integer;
+begin
+  setLength(self,(_Length:=self.indexes())+1);
+  self[_Length]:=vCharacter;
+  exit(_Length+1);
+end;
+
 function tCharacters.reverse():tCharacters;
 var
   _Decrease,
     _Increase:integer;
 begin
-  setLength(result,length(self));
+  setLength(result,self.indexes());
   for _Decrease:=high(self) downTo 0 do
   begin
     result[_Increase]:=self[_Decrease];
     _Increase+=1;
   end;
+  exit(result);
+end;
+
+function tCharacters.shuffle():tCharacters;
+var _Index:integer;
+begin
+  for _Index:=high(result:=self) downto 0 do
+    system.swap(result[_Index],result[random(_Index+1)]);
   exit(result);
 end;
 

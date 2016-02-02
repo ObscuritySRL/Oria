@@ -26,11 +26,11 @@ end;
 procedure tPoint.mouse(vAction:string);
 begin
   case lowercase(vAction) of
-    'down':       scrollMouse(self.x,self.y,1);
-    'left':       clickMouse(self.x,self.y,1);
-    'move':       moveMouse(self.x,self.y);
-    'right':      clickMouse(self.x,self.y,0);
-    'up':         scrollMouse(self.x,self.y,-1);
+    'down':       ogl.mouse.down(self);
+    'left':       ogl.mouse.left(self);
+    'move':       ogl.mouse.move(self);
+    'right':      ogl.mouse.right(self);
+    'up':         ogl.mouse.up(self);
   end;
 end;
 

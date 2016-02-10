@@ -1,0 +1,42 @@
+(*
+  CHAR
+*)
+
+function char.debug(vClear:boolean=false):char;
+var
+  _Debug,
+    _Name:string;
+begin
+  if vClear then
+    clearDebug();
+  _Name:=getGlobalName(@self);
+  if _Name='' then
+    _Name:='char';
+  writeLN(ogl.uptime()+' | '+ogl.script()+' > '+_Name+' > '''+toStr(self)+'''');
+  exit(self);
+end;
+
+function char.defined():boolean;
+begin exit(self.unequal(#0));end;
+
+function char.duplicate(vCount:integer):string;
+begin
+  for 0 to vCount-1 do
+    result+=self;
+  exit(result);
+end;
+
+function char.equals(vChar:char):boolean;
+begin exit(self=vChar);end;
+
+function char.integer():integer;
+begin exit(byte(self))end;
+
+function char.lower():string;
+begin exit(lowerCase(self));end;
+
+function char.unequal(vChar:char):boolean;
+begin exit(not self.equals(vChar));end;
+
+function char.upper():string;
+begin exit(upperCase(self));end;

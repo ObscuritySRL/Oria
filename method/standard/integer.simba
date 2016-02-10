@@ -1,0 +1,29 @@
+(*
+  INTEGER
+*)
+
+function integer.boolean():boolean;
+begin exit(self);end;
+
+function integer.debug(vClear:boolean=false):integer;
+var
+  _Debug,
+    _Name:string;
+begin
+  if vClear then
+    clearDebug();
+  _Name:=getGlobalName(@self);
+  if _Name='' then
+    _Name:='integer';
+  writeLN(ogl.uptime()+' | '+ogl.script()+' > '+_Name+' > '+toStr(self));
+  exit(self);
+end;
+
+function integer.defined():boolean;
+begin exit(self.unequal(integer(nil)));end;
+
+function integer.equals(vInteger:integer):boolean;
+begin exit(self=vInteger);end;
+
+function integer.unequal(vInteger:integer):boolean;
+begin exit(not self.equals(vInteger));end;

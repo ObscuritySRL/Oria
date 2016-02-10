@@ -2,17 +2,27 @@
   TBOXARRAY
 *)
 
+function tBoxArray.bounds():tBox;
+var
+  _Index:integer;
+  _Points:tPointArray;
+begin
+    for _Index to high(self) do
+      _Points.concat(self[_Index].points());
+    exit(_Points.bounds());
+end;
+
 function tBoxArray.concat(vBoxes:tBoxArray):tBoxArray;
 begin
-  insert(self,vBoxes);
-  exit(vBoxes);
+  insert(vBoxes,self);
+  exit(self);
 end;
 
 function tBoxArray.contains(vBox:tBox):boolean;
 var _Index:integer;
 begin
   for _Index to high(self) do
-    if compareMem(@self[_Index],@vBox,ogl.size.box) then
+    if compareMem(@self[_Index],@vBox,sizeOf(tBox)) then
       exit(true);
 end;
 
@@ -23,6 +33,32 @@ function tBoxArray.eq(vIndex:integer):tBox;
 begin
   if vIndex<self.indexes() then
     exit(self[vIndex]);
+end;
+
+function tBoxArray.debug(vClear:boolean=false):tBoxArray;
+var
+  _Debug,
+    _Message,
+    _Name:string;
+  _Index:integer;
+begin
+  if vClear then
+    clearDebug();
+  _Name:=getGlobalName(@self);
+  if _Name='' then
+    _Name:='tBoxArray';
+  if length(self) then
+  begin
+    _Debug:=ogl.uptime()+' | '+ogl.script()+' > '+_Name+'[';
+    _Message:=_Debug+'0..'+toStr(high(self))+']'+#13#10;
+    for _Index to high(self) do
+      _Message+=_Debug+toStr(_Index)+'] > '+toStr(self[_Index])+#13#10;
+   _Message:=trim(_Message);
+  end
+  else
+    _Message:=ogl.uptime()+' | '+ogl.script()+' > '+_Name+'[]';
+  writeLN(_Message);
+  exit(self);
 end;
 
 function tBoxArray.find(vProperty:string;vValues:integer):tBoxArray;
@@ -39,32 +75,35 @@ end;
 function compareRange(vValue:integer;vValues:tIntegerArray):boolean;
 begin exit((vValue>=vValues[0]) and (vValue<=vValues[high(vValues)]));end;
 var
-  _BoxCount,
-    _BoxIndex,
-    _BoxOffset:integer;
-  _BoxPointer:pointer;
+  _Count,
+    _Index,
+    _Offset:integer;
+  _Pointer:pointer;
   _FunctionCompare:function(vValue:integer;vValues:tIntegerArray):boolean=@compareAll;
 begin
-  if (_BoxCount:=self.indexes()) then
-    if (_BoxOffset:=tBox.offset(vProperty))<>-1 then
-      if not vValues.empty() then
+  _Count:=self.indexes();
+  if _Count then
+  begin
+    _Offset:=tBox.offset(vProperty);
+    if (_Offset<>-1) and (not vValues.empty()) then
+    begin
+      if vValues.range() then
+        _FunctionCompare:=@compareRange;
+      _Pointer:=pointer(self)+_Offset;
+      setLength(result,_Count);
+      for 0 to _Count-1 do
       begin
-        if vValues.range() then
-          _FunctionCompare:=@compareRange;
-        _BoxPointer:=pointer(self)+_BoxOffset;
-        setLength(result,_BoxCount);
-        for 0 to _BoxCount-1 do
+        if _FunctionCompare(integer(_Pointer^),vValues) then
         begin
-          if _FunctionCompare(integer(_BoxPointer^),vValues) then
-          begin
-            result[_BoxIndex]:=tBox((_BoxPointer-_BoxOffset)^);
-            _BoxIndex+=1;
-          end;
-          _BoxPointer+=ogl.size.box;
+          result[_Index]:=tBox((_Pointer-_Offset)^);
+          _Index+=1;
         end;
-        setLength(result,_BoxIndex);
-        exit(result);
+        _Pointer+=sizeOf(tBox);
       end;
+      setLength(result,_Index);
+      exit(result);
+    end;
+  end;
 end;
 
 function tBoxArray.first():tBox;
@@ -82,12 +121,16 @@ begin
     exit(self[high(self)]);
 end;
 
+function tBoxArray.nonempty():boolean;
+begin exit(not self.empty())end;
+
 function tBoxArray.pop():tBox;
 var _High:integer;
 begin
   if not self.empty() then
   begin
-    result:=self[_High:=high(self)];
+    _High:=high(self);
+    result:=self[_High];
     setLength(self,_High);
     exit(result);
   end;
@@ -115,12 +158,49 @@ begin
   exit(result);
 end;
 
-function tBoxArray.shuffle():tBoxArray;
+function tBoxArray.shift():tBox;
+begin exit(self.splice(0,1).eq(0));end;
+
+function tBoxArray.shuffle(vOverwrite:boolean=false):tBoxArray;
 var _Index:integer;
 begin
-  for _Index:=high(result:=self) downto 0 do
+  result:=self;
+  for _Index:=high(result) downto 0 do
     system.swap(result[_Index],result[random(_Index+1)]);
+  if vOverwrite then
+    self:=result;
   exit(result);
+end;
+
+function tBoxArray.splice(vIndex,vCount:integer):tBoxArray;
+var
+  _BoxIndex,
+    _High,
+    _ResultIndex:integer;
+begin
+  _High:=high(self);
+  if (vIndex<=_High) and (vCount>0) then
+  begin
+    setLength(result,length(self));
+    for _BoxIndex to _High do
+    begin
+      if (_BoxIndex>=vIndex) and (_ResultIndex<vCount) then
+      begin
+        result[_ResultIndex]:=self[_BoxIndex];
+        _ResultIndex+=1;
+      end
+      else
+        self[_BoxIndex-_ResultIndex]:=self[_BoxIndex];
+    end;
+    setLength(result,_ResultIndex);
+    setLength(self,_BoxIndex-_ResultIndex);
+  end;
+end;
+
+function tBoxArray.unshift(vBox:tBox):integer;
+begin
+  insert([vBox],self);
+  exit(length(self));
 end;
 
 function tBoxArray.x1(vX1:integer):tBoxArray;

@@ -1,0 +1,75 @@
+(*
+  STRING
+*)
+
+function string.debug(vClear:boolean=false):string;
+var
+  _Debug,
+    _Message,
+    _Name:string;
+begin
+  if vClear then
+    clearDebug();
+  _Name:=getGlobalName(@self);
+  if _Name='' then
+    _Name:='string';
+  if self.nonempty() then
+    _Message:=ogl.uptime()+' | '+ogl.script()+' > '+_Name+'[1..'+toStr(length(self))+'] > '''+self+''''
+  else
+     _Message:=ogl.uptime()+' | '+ogl.script()+' > '+_Name+'[]';
+  writeLN(_Message);
+  exit(self);
+end;
+
+function string.defined():boolean;
+begin exit(self.unequal(string(nil)));end;
+
+function string.empty():boolean;
+begin exit(self.indexes()=0);end;
+
+function string.equals(vString:string):boolean;
+begin exit(self=vString);end;
+
+function string.indexes():integer;
+begin exit(length(self));end;
+
+function string.lower():string;
+begin exit(lowerCase(self));end;
+
+function string.nonempty():boolean;
+begin exit(not self.empty());end;
+
+function string.parse(vType:char):string;
+var _Expression:string;
+begin
+  case vType of
+    'd':_Expression:='[^0-9]';      {Numeric}
+    'D':_Expression:='[0-9]';       {Not numeric}
+    'p':_Expression:='[^A-Za-z]';   {Alphabetic}
+    'P':_Expression:='[A-Za-z]';    {Not alphabetic}
+    'w':_Expression:='[^0-9A-Za-z]';{Alphanumeric}
+    'W':_Expression:='[0-9A-Za-z]'; {Not alphanumeric}
+  end;
+  if _Expression<>'' then
+    exit(replaceRegExpr(_Expression,self,'',false));
+end;
+
+function string.reverse():string;
+var
+  _Decrease,
+    _Increase:integer=1;
+begin
+  setLength(result,length(self));
+  for _Decrease:=length(self) downTo 1 do
+  begin
+    result[_Increase]:=self[_Decrease];
+    _Increase+=1;
+  end;
+  exit(result);
+end;
+
+function string.unequal(vString:string):boolean;
+begin exit(not self.equals(vString));end;
+
+function string.upper():string;
+begin exit(upperCase(self));end;

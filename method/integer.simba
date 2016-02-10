@@ -1,6 +1,0 @@
-(*
-  INTEGER
-*)
-
-function integer.normal():integer;
-begin exit(round(self/2+(self/2)*((randomE()+randomE()+randomE()+randomE()+randomE()+randomE()+randomE()+randomE()+randomE()+randomE()+randomE()+randomE()-6)/6)));end;

@@ -1,0 +1,20 @@
+(*
+  BOOLEAN
+*)
+
+function boolean.debug(vClear:boolean=false):boolean;
+var
+  _Debug,
+    _Name:string;
+begin
+  if vClear then
+    clearDebug();
+  _Name:=getGlobalName(@self);
+  if _Name='' then
+    _Name:='boolean';
+  writeLN(ogl.uptime()+' | '+ogl.script()+' > '+_Name+' > '+toStr(self));
+  exit(self);
+end;
+
+function boolean.false():boolean;
+begin exit(self=false);end;

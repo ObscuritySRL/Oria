@@ -1,0 +1,349 @@
+(*
+  TMODELS
+*)
+
+function tModels.bounds():tBox;
+begin exit(self.boxes().bounds());end;
+
+function tModels.boundsX1(vBoundsX1:integer):tModels;
+begin exit(self.find('bounds.x1',vBoundsX1));end;
+
+function tModels.boundsX1(vBoundsX1s:tIntegerArray):tModels;overload;
+begin exit(self.find('bounds.x1',vBoundsX1s));end;
+
+function tModels.boundsX2(vBoundsX2:integer):tModels;
+begin exit(self.find('bounds.x2',vBoundsX2));end;
+
+function tModels.boundsX2(vBoundsX2s:tIntegerArray):tModels;overload;
+begin exit(self.find('bounds.x2',vBoundsX2s));end;
+
+function tModels.boundsY1(vBoundsY1:integer):tModels;
+begin exit(self.find('bounds.y1',vBoundsY1));end;
+
+function tModels.boundsY1(vBoundsY1s:tIntegerArray):tModels;overload;
+begin exit(self.find('bounds.y1',vBoundsY1s));end;
+
+function tModels.boundsY2(vBoundsY2:integer):tModels;
+begin exit(self.find('bounds.y2',vBoundsY2));end;
+
+function tModels.boundsY2(vBoundsY2s:tIntegerArray):tModels;overload;
+begin exit(self.find('bounds.y2',vBoundsY2s));end;
+
+function tModels.boxes():tBoxArray;
+var _Index:integer;
+begin
+  setLength(result,self.indexes());
+  for _Index to high(self) do
+    result[_Index]:=self[_Index].bounds.fix();
+  exit(result);
+end;
+
+function tModels.closest(vCharacter:tCharacter):tModels;
+begin exit(self.closest(vCharacter.position));end;
+
+function tModels.closest(vModel:tModel):tModels;overload;
+begin exit(self.closest(vModel.position));end;
+
+function tModels.closest(vPoint:tPoint):tModels;overload;
+var
+  _Distance:array of extended;
+  _High,
+    _Index,
+    _Left,
+    _Right:integer;
+  _TempDistance:extended;
+  _TempModel:tModel;
+begin
+  result:=self;
+  setLength(_Distance,length(result));
+  for _Index to _High:=high(result) do
+    _Distance[_Index]:=self[_Index].distance(vPoint);
+  for _Left to _High do
+    for _Right:=_Left+1 to _High do
+      if _Distance[_Left]>_Distance[_Right] then
+      begin
+        _TempDistance:=_Distance[_Left];
+        _Distance[_Left]:=_Distance[_Right];
+        _Distance[_Right]:=_TempDistance;
+        _TempModel:=result[_Left];
+        result[_Left]:=result[_Right];
+        result[_Right]:=_TempModel;
+      end;
+  exit(result);
+end;
+
+function tModels.closest(vTexture:tTexture):tModels;overload;
+begin exit(self.closest(vTexture.position));end;
+
+function tModels.concat(vModels:tModels):tModels;
+begin
+  insert(vModels,self);
+  exit(self);
+end;
+
+function tModels.contains(vModel:tModel):boolean;
+var _Index:integer;
+begin
+  for _Index to high(self) do
+    if compareMem(@self[_Index],@vModel,sizeOf(tModel)) then
+      exit(true);
+end;
+
+function tModels.debug(vClear:boolean=false):tModels;
+var
+  _Debug,
+    _Message,
+    _Name:string;
+  _Index:integer;
+begin
+  if vClear then
+    clearDebug();
+  _Name:=getGlobalName(@self);
+  if _Name='' then
+    _Name:='tModels';
+  if length(self) then
+  begin
+    _Debug:=ogl.uptime()+' | '+ogl.script()+' > '+_Name+'[';
+    _Message:=_Debug+'0..'+toStr(high(self))+']'+#13#10;
+    for _Index to high(self) do
+      _Message+=_Debug+toStr(_Index)+'] > '+toStr(self[_Index])+#13#10;
+   _Message:=trim(_Message);
+  end
+  else
+    _Message:=ogl.uptime()+' | '+ogl.script()+' > '+_Name+'[]';
+  writeLN(_Message);
+  exit(self);
+end;
+
+function tModels.delete(vIndex:integer):tModel;
+begin exit(self.splice(vIndex,1).eq(0));end;
+
+function tModels.empty():boolean;
+begin exit(self.indexes()=0);end;
+
+function tModels.eq(vIndex:integer):tModel;
+begin
+  if vIndex<self.indexes() then
+    exit(self[vIndex]);
+end;
+
+function tModels.find(vProperty:string;vValue:integer):tModels;
+begin exit(self.find(vProperty,[vValue]));end;
+
+function tModels.find(vProperty:string;vValues:tIntegerArray):tModels;overload;
+function compareAll(vValue:integer;vValues:tIntegerArray):boolean;
+var _Index:integer;
+begin
+  for _Index to high(vValues) do
+    if vValue=vValues[_Index] then
+      exit(true);
+end;
+function compareRange(vValue:integer;vValues:tIntegerArray):boolean;
+begin exit((vValue>=vValues[0]) and (vValue<=vValues[high(vValues)]));end;
+var
+  _Count,
+    _Index,
+    _Offset:integer;
+  _FunctionCompare:function(vValue:integer;vValues:tIntegerArray):boolean=@compareAll;
+  _Pointer:pointer;
+begin
+  _Count:=self.indexes();
+  if _Count then
+  begin
+    _Offset:=tModel.offset(vProperty);
+    if (_Offset<>-1) and (not vValues.empty()) then
+    begin
+      if vValues.range() then
+        _FunctionCompare:=@compareRange;
+      _Pointer:=pointer(self)+_Offset;
+      setLength(result,_Count);
+      for 0 to _Count-1 do
+      begin
+        if _FunctionCompare(integer(_Pointer^),vValues) then
+        begin
+          result[_Index]:=tModel((_Pointer-_Offset)^);
+          _Index+=1;
+        end;
+        _Pointer+=sizeOf(tModel);
+      end;
+      setLength(result,_Index);
+      exit(result);
+    end;
+  end;
+end;
+
+function tModels.first():tModel;
+begin
+  if not self.empty() then
+    exit(self[0]);
+end;
+
+function tModels.height(vHeight:integer):tModels;
+begin exit(self.find('height',[vHeight]));end;
+
+function tModels.height(vHeights:tIntegerArray):tModels;overload;
+begin exit(self.find('height',vHeights));end;
+
+function tModels.id(vID:integer):tModels;
+begin exit(self.find('id',vID));end;
+
+function tModels.id(vIDs:tIntegerArray):tModels;overload;
+begin exit(self.find('id',vIDs));end;
+
+function tModels.index(vProperty:string;vValue:integer):integer;
+begin exit(self.index(vProperty,[vValue]));end;
+
+function tModels.index(vProperty:string;vValues:tIntegerArray):integer;overload;
+function compareAll(vValue:integer;vValues:tIntegerArray):boolean;
+var _Index:integer;
+begin
+  for _Index to high(vValues) do
+    if vValue=vValues[_Index] then
+      exit(true);
+end;
+function compareRange(vValue:integer;vValues:tIntegerArray):boolean;
+begin exit((vValue>=vValues[0]) and (vValue<=vValues[high(vValues)]));end;
+var
+  _Count,
+    _Index,
+    _Offset:integer;
+  _FunctionCompare:function(vValue:integer;vValues:tIntegerArray):boolean=@compareAll;
+  _Pointer:pointer;
+begin
+  if (_Count:=self.indexes()) then
+    if (_Offset:=tModel.offset(vProperty))<>-1 then
+      if not vValues.empty() then
+      begin
+        if vValues.range() then
+          _FunctionCompare:=@compareRange;
+        _Pointer:=pointer(self)+_Offset;
+        for _Index to _Count-1 do
+        begin
+          if _FunctionCompare(integer(_Pointer^),vValues) then
+              exit(_Index);
+          _Pointer+=sizeOf(tModel);
+        end;
+      end;
+  exit(-1);
+end;
+
+function tModels.indexes():integer;overload;
+begin exit(length(self));end;
+
+function tModels.last():tModel;
+begin
+  if not self.empty() then
+    exit(self[high(self)]);
+end;
+
+procedure tModels.mouse(vAction:string);
+begin
+  if not self.empty() then
+    self[0].bounds.mouse(vAction);
+end;
+
+function tModels.nonempty():boolean;
+begin exit(not self.empty())end;
+
+function tModels.pop():tModel;
+var _High:integer;
+begin
+  if not self.empty() then
+  begin
+    _High:=high(self);
+    result:=self[_High];
+    setLength(self,_High);
+    exit(result);
+  end;
+end;
+
+function tModels.positionX(vPositionX:integer):tModels;
+begin exit(self.find('position.x',vPositionX));end;
+
+function tModels.positionX(vPositionXs:tIntegerArray):tModels;overload;
+begin exit(self.find('position.x',vPositionXs));end;
+
+function tModels.positionY(vPositionY:integer):tModels;
+begin exit(self.find('position.y',vPositionY));end;
+
+function tModels.positionY(vPositionYs:tIntegerArray):tModels;overload;
+begin exit(self.find('position.y',vPositionYs));end;
+
+function tModels.push(vModel:tModel):integer;
+var _Length:integer;
+begin
+  setLength(self,(_Length:=self.indexes())+1);
+  self[_Length]:=vModel;
+  exit(_Length+1);
+end;
+
+function tModels.reverse():tModels;
+var
+  _Decrease,
+    _Increase:integer;
+begin
+  setLength(result,self.indexes());
+  for _Decrease:=high(self) downTo 0 do
+  begin
+    result[_Increase]:=self[_Decrease];
+    _Increase+=1;
+  end;
+  exit(result);
+end;
+
+function tModels.scale(vScale:integer):tModels;
+begin exit(self.find('scale',vScale));end;
+
+function tModels.scale(vScales:tIntegerArray):tModels;overload;
+begin exit(self.find('scale',vScales));end;
+
+function tModels.shift():tModel;
+begin exit(self.splice(0,1).eq(0));end;
+
+function tModels.shuffle(vOverwrite:boolean=false):tModels;
+var _Index:integer;
+begin
+  result:=self;
+  for _Index:=high(result) downto 0 do
+    system.swap(result[_Index],result[random(_Index+1)]);
+  if vOverwrite then
+    self:=result;
+  exit(result);
+end;
+
+function tModels.splice(vIndex,vCount:integer):tModels;
+var
+  _High,
+    _ModelIndex,
+    _ResultIndex:integer;
+begin
+  _High:=high(self);
+  if (vIndex<=_High) and (vCount>0) then
+  begin
+    setLength(result,length(self));
+    for _ModelIndex to _High do
+    begin
+      if (_ModelIndex>=vIndex) and (_ResultIndex<vCount) then
+      begin
+        result[_ResultIndex]:=self[_ModelIndex];
+        _ResultIndex+=1;
+      end
+      else
+        self[_ModelIndex-_ResultIndex]:=self[_ModelIndex];
+    end;
+    setLength(result,_ResultIndex);
+    setLength(self,_ModelIndex-_ResultIndex);
+  end;
+end;
+
+function tModels.unshift(vModel:tModel):integer;
+begin
+  insert([vModel],self);
+  exit(length(self));
+end;
+
+function tModels.width(vWidth:integer):tModels;
+begin exit(self.find('width',vWidth));end;
+
+function tModels.width(vWidths:tIntegerArray):tModels;overload;
+begin exit(self.find('width',vWidths));end;

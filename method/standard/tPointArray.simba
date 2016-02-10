@@ -2,17 +2,45 @@
   TPOINTARRAY
 *)
 
+function tPointArray.bounds():tBox;
+var _Index:integer;
+begin
+  if not self.empty() then
+  begin
+    result:=[2147483647,2147483647,-2147483647,-2147483647];
+    for _Index to high(self) do
+      result:=[min(result.x1,self[_Index].x),min(result.y1,self[_Index].y),max(result.x2,self[_Index].x),max(result.y2,self[_Index].y)];
+    exit(result);
+  end;
+end;
+
+function tPointArray.closest(vCharacter:tCharacter):tPointArray;
+begin exit(self.closest(vCharacter.position));end;
+
+function tPointArray.closest(vModel:tModel):tPointArray;overload;
+begin exit(self.closest(vModel.position));end;
+
+function tPointArray.closest(vPoint:tPoint):tPointArray;overload;
+begin
+  result:=self;
+  sortTPAFrom(result,vPoint);
+  exit(result);
+end;
+
+function tPointArray.closest(vTexture:tTexture):tPointArray;overload;
+begin exit(self.closest(vTexture.position));end;
+
 function tPointArray.concat(vPoints:tPointArray):tPointArray;
 begin
-  insert(self,vPoints);
-  exit(vPoints);
+  insert(vPoints,self);
+  exit(self);
 end;
 
 function tPointArray.contains(vPoint:tPoint):boolean;
 var _Index:integer;
 begin
   for _Index to high(self) do
-    if compareMem(@self[_Index],@vPoint,ogl.size.point) then
+    if compareMem(@self[_Index],@vPoint,sizeOf(tPoint)) then
       exit(true);
 end;
 
@@ -44,6 +72,32 @@ begin
   exit(_Lower.concat(_Upper));
 end;
 
+function tPointArray.debug(vClear:boolean=false):tPointArray;
+var
+  _Debug,
+    _Message,
+    _Name:string;
+  _Index:integer;
+begin
+  if vClear then
+    clearDebug();
+  _Name:=getGlobalName(@self);
+  if _Name='' then
+    _Name:='tPointArray';
+  if length(self) then
+  begin
+    _Debug:=ogl.uptime()+' | '+ogl.script()+' > '+_Name+'[';
+    _Message:=_Debug+'0..'+toStr(high(self))+']'+#13#10;
+    for _Index to high(self) do
+      _Message+=_Debug+toStr(_Index)+'] > '+toStr(self[_Index])+#13#10;
+   _Message:=trim(_Message);
+  end
+  else
+    _Message:=ogl.uptime()+' | '+ogl.script()+' > '+_Name+'[]';
+  writeLN(_Message);
+  exit(self);
+end;
+
 function tPointArray.empty():boolean;
 begin exit(self.indexes()=0);end;
 
@@ -68,31 +122,34 @@ function compareRange(vValue:integer;vValues:tIntegerArray):boolean;
 begin exit((vValue>=vValues[0]) and (vValue<=vValues[high(vValues)]));end;
 var
   _FunctionCompare:function(vValue:integer;vValues:tIntegerArray):boolean=@compareAll;
-  _PointCount,
-    _PointIndex,
-    _PointOffset:integer;
-  _PointPointer:pointer;
+  _Count,
+    _Index,
+    _Offset:integer;
+  _Pointer:pointer;
 begin
-  if (_PointCount:=self.indexes()) then
-    if (_PointOffset:=tPoint.offset(vProperty))<>-1 then
-      if not vValues.empty() then
+  _Count:=self.indexes();
+  if _Count then
+  begin
+    _Offset:=tPoint.offset(vProperty);
+    if (_Offset<>-1) and (not vValues.empty()) then
+    begin
+      if vValues.range() then
+        _FunctionCompare:=@compareRange;
+      _Pointer:=pointer(self)+_Offset;
+      setLength(result,_Count);
+      for 0 to _Count-1 do
       begin
-        if vValues.range() then
-          _FunctionCompare:=@compareRange;
-        _PointPointer:=pointer(self)+_PointOffset;
-        setLength(result,_PointCount);
-        for 0 to _PointCount-1 do
+        if _FunctionCompare(integer(_Pointer^),vValues) then
         begin
-          if _FunctionCompare(integer(_PointPointer^),vValues) then
-          begin
-            result[_PointIndex]:=tPoint((_PointPointer-_PointOffset)^);
-            _PointIndex+=1;
-          end;
-          _PointPointer+=ogl.size.point;
+          result[_Index]:=tPoint((_Pointer-_Offset)^);
+          _Index+=1;
         end;
-        setLength(result,_PointIndex);
-        exit(result);
+        _Pointer+=sizeOf(tPoint);
       end;
+      setLength(result,_Index);
+      exit(result);
+    end;
+  end;
 end;
 
 function tPointArray.first():tPoint;
@@ -128,12 +185,16 @@ begin
     exit(self[high(self)]);
 end;
 
+function tPointArray.nonempty():boolean;
+begin exit(not self.empty())end;
+
 function tPointArray.pop():tPoint;
 var _High:integer;
 begin
   if not self.empty() then
   begin
-    result:=self[_High:=high(self)];
+    _High:=high(self);
+    result:=self[_High];
     setLength(self,_High);
     exit(result);
   end;
@@ -161,11 +222,14 @@ begin
   exit(result);
 end;
 
-function tPointArray.shuffle():tPointArray;
+function tPointArray.shuffle(vOverwrite:boolean=false):tPointArray;
 var _Index:integer;
 begin
-  for _Index:=high(result:=self) downto 0 do
+  result:=self;
+  for _Index:=high(result) downto 0 do
     system.swap(result[_Index],result[random(_Index+1)]);
+  if vOverwrite then
+    self:=result;
   exit(result);
 end;
 

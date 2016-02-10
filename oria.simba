@@ -5,162 +5,191 @@
 {$loadlib proSocks}
 
 type tCharacter=record
-  bounds:                           tBox;
-  color:                            integer;
-  height:                           integer;
-  id:                               integer;
-  letter:                           char;
-  position:                         tPoint;
-  width:                            integer;
+  bounds:               tBox;
+  color:                integer;
+  height:               integer;
+  id:                   integer;
+  index:                integer;
+  letter:               char;
+  position:             tPoint;
+  width:                integer;
 end;
 
 type tCharacters=array of tCharacter;
 
 type tCountDown=integer;
 
-type tKeyboard=record
-  speed:                            integer;
-end;
-
 type tModel=record
-  bounds:                           tBox;
-  height:                           integer;
-  id:                               integer;
-  position:                         tPoint;
-  scale:                            integer;
-  width:                            integer;
+  bounds:               tBox;
+  height:               integer;
+  id:                   integer;
+  index:                integer;
+  position:             tPoint;
+  scale:                integer;
+  vertices:             tPointArray;
+  width:                integer;
 end;
 
 type tModels=array of tModel;
 
-type tMouse=record
-  speed:                            integer;
-end;
-
 type tTexture=record
-  bounds:                           tBox;
-  color:                            integer;
-  height:                           integer;
-  id:                               integer;
-  position:                         tPoint;
-  width:                            integer;
+  bounds:               tBox;
+  color:                integer;
+  height:               integer;
+  id:                   integer;
+  index:                integer;
+  opacity:              integer;
+  position:             tPoint;
+  width:                integer;
 end;
 
 type tTextures=array of tTexture;
 
-type tOGLCache=record
-  character:                        tCharacters;
-  model:                            tModels;
-  texture:                          tTextures;
+type tControls=record
+  backpack:             char;
+  defence:              char;
+  familiar:             char;
+  heal:                 char;
+  magic:                char;
+  melee:                char;
+  pray:                 char;
+  prayer:               char;
+  ranged:               char;
+  retaliate:            char;
+  run:                  char;
+  skill:                char;
+  special:              char;
+  task:                 char;
+  worn:                 char;
 end;
 
-type tOGLControlAction=record
-  familiar:                         char;
-  heal:                             char;
-  prayer:                           char;
-  retaliate:                        char;
-  run:                              char;
-  special:                          char;
+(*
+  ogl.keyboard
+*)
+
+type tKeyboard=pointer;
+
+(*
+  ogl.mouse
+*)
+
+type tMouse=pointer;
+
+(*
+  ogl.cache
+*)
+
+type tCache=record
+  character:            tCharacters;
+  model:                tModels;
+  texture:              tTextures;
 end;
 
-type tOGLControlInterfaces=record
-  backpack:                         char;
-  defence:                          char;
-  magic:                            char;
-  melee:                            char;
-  prayer:                           char;
-  ranged:                           char;
-  skill:                            char;
-  task:                             char;
-  worn:                             char;
-end;
+(*
+  ogl.interfaces.*
+*)
 
-type tOGLControl=record
-  actions:                          tOGLControlAction;
-  interfaces:                       tOGLControlInterfaces;
-end;
-
-type tOGLSize=record
-  box:                              integer;
-  character:                        integer;
-  integer:                          integer;
-  model:                            integer;
-  point:                            integer;
-  texture:                          integer;
-end;
+type tBackpack=         pointer;
+type tBank=             pointer;
+type tChat=             pointer;
+type tDefence=          pointer;
+type tMagic=            pointer;
+type tMelee=            pointer;
+type tPrayer=           pointer;
+type tRanged=           pointer;
+type tSkill=            pointer;
+type tTask=             pointer;
+type tWorn=             pointer;
 
 type tOGL=record
-  cache:                            tOGLCache;
-  controls:                         tOGLControl;
-  keyboard:                         tKeyboard;
-  mouse:                            tMouse;
-  size:                             tOGLSize;
+  cache:                tCache;
 end;
 
 var
-  ogl:                              tOGL;
+  backpack:             tBackPack;
+  bank:                 tBank;
+  chat:                 tChat;
+  controls:             tControls;
+  defence:              tDefence;
+  keyboard:             tKeyboard;
+  magic:                tMagic;
+  melee:                tMelee;
+  mouse:                tMouse;
+  ogl:                  tOGL;
+  prayer:               tPrayer;
+  ranged:               tRanged;
+  skill:                tSkill;
+  task:                 tTask;
+  worn:                 tWorn;
 
-{$i method\tMouse.simba}
-{$i method\tKeyboard.simba}
+{$i core\math.simba}
 
-{$i method\char.simba}
-{$i method\integer.simba}
-{$i method\pointer.simba}
-{$i method\string.simba}
-{$i method\tBox.simba}
-{$i method\tBoxArray.simba}
-{$i method\tCharArray.simba}
-{$i method\tIntegerArray.simba}
-{$i method\tPoint.simba}
-{$i method\tPointArray.simba}
-{$i method\tStringArray.simba}
-{$i method\variant.simba}
+{$i method\oria\tCountDown.simba}
 
-{$i method\tCountDown.simba}
+{$i method\oria\tMouse.simba}
+{$i method\oria\tKeyboard.simba}
 
-{$i method\tOGL.simba}
+{$i method\oria\tOGL.simba}
 
-{$i method\tCharacter.simba}
-{$i method\tCharacters.simba}
-{$i method\tModel.simba}
-{$i method\tModels.simba}
-{$i method\tTexture.simba}
-{$i method\tTextures.simba}
+{$i method\oria\tCharacter.simba}
+{$i method\oria\tCharacters.simba}
+{$i method\oria\tModel.simba}
+{$i method\oria\tModels.simba}
+{$i method\oria\tTexture.simba}
+{$i method\oria\tTextures.simba}
+
+{$i method\standard\boolean.simba}
+{$i method\standard\char.simba}
+{$i method\standard\integer.simba}
+{$i method\standard\pointer.simba}
+{$i method\standard\string.simba}
+{$i method\standard\tBox.simba}
+{$i method\standard\tBoxArray.simba}
+{$i method\standard\tCharArray.simba}
+{$i method\standard\tIntegerArray.simba}
+{$i method\standard\tPoint.simba}
+{$i method\standard\tPointArray.simba}
+{$i method\standard\tStringArray.simba}
+{$i method\standard\variant.simba}
+
 
 
 
 begin
   clearDebug();
 
+  backpack:=            @ogl;
+  bank:=                @ogl;
+  chat:=                @ogl;
+  defence:=             @ogl;
+  keyboard:=            @ogl;
+  magic:=               @ogl;
+  melee:=               @ogl;
+  mouse:=               @ogl;
+  prayer:=              @ogl;
+  ranged:=              @ogl;
+  skill:=               @ogl;
+  task:=                @ogl;
+  worn:=                @ogl;
+
   (* Not used by RS3 defaults: q e y f z [ ] f ; ' z x c v , . / *)
   (*             ...continued: insert home delete end            *)
 
-  ogl.controls.actions.familiar:=   ogl.load('controls.actions',    'familiar', 'f');
-  ogl.controls.actions.heal:=       ogl.load('controls.actions',    'heal',     '');
-  ogl.controls.actions.prayer:=     ogl.load('controls.actions',    'prayer',   '');
-  ogl.controls.actions.retaliate:=  ogl.load('controls.actions',    'retaliate','');
-  ogl.controls.actions.run:=        ogl.load('controls.actions',    'run',      'r');
-  ogl.controls.actions.special:=    ogl.load('controls.actions',    'special',  '');
-  ogl.controls.interfaces.backpack:=ogl.load('controls.interfaces', 'backpack', 'b');
-  ogl.controls.interfaces.defence:= ogl.load('controls.interfaces', 'defence',  'k');
-  ogl.controls.interfaces.magic:=   ogl.load('controls.interfaces', 'magic',    'u');
-  ogl.controls.interfaces.melee:=   ogl.load('controls.interfaces', 'melee',    'i');
-  ogl.controls.interfaces.prayer:=  ogl.load('controls.interfaces', 'prayer',   'p');
-  ogl.controls.interfaces.ranged:=  ogl.load('controls.interfaces', 'ranged',   'o');
-  ogl.controls.interfaces.skill:=   ogl.load('controls.interfaces', 'skill',    'h');
-  ogl.controls.interfaces.task:=    ogl.load('controls.interfaces', 'task',     'j');
-  ogl.controls.interfaces.worn:=    ogl.load('controls.interfaces', 'worn',     'n');
-
-  ogl.keyboard.speed:=              ogl.load('keyboard',            'speed',    200);
-
-  ogl.mouse.speed:=                 ogl.load('mouse',               'speed',    350);
-
-  ogl.size.box:=                    sizeOf(tBox);
-  ogl.size.character:=              sizeOf(tCharacter);
-  ogl.size.integer:=                sizeOf(integer);
-  ogl.size.model:=                  sizeOf(tModel);
-  ogl.size.point:=                  sizeOf(tPoint);
-  ogl.size.texture:=                sizeOf(tTexture);
+  controls.backpack:=   ogl.load('controls','backpack', 'b');
+  controls.defence:=    ogl.load('controls','defence',  'k');
+  controls.familiar:=   ogl.load('controls','familiar', 'f');
+  controls.heal:=       ogl.load('controls','heal',     '');
+  controls.magic:=      ogl.load('controls','magic',    'u');
+  controls.melee:=      ogl.load('controls','melee',    'i');
+  controls.pray:=       ogl.load('controls','pray',     '');
+  controls.prayer:=     ogl.load('controls','prayer',   'p');
+  controls.ranged:=     ogl.load('controls','ranged',   'o');
+  controls.retaliate:=  ogl.load('controls','retaliate','');
+  controls.run:=        ogl.load('controls','run',      'r');
+  controls.skill:=      ogl.load('controls','skill',    'h');
+  controls.special:=    ogl.load('controls','special',  '');
+  controls.task:=       ogl.load('controls','task',     'j');
+  controls.worn:=       ogl.load('controls','worn',     'n');
 end;
 
 {$f-}

@@ -8,9 +8,11 @@ begin exit(self.call(getGlobalPtr(vProcedure),vDebug));end;
 function tOGL.call(vProcedure:procedure;vDebug:boolean=false):boolean;overload;
 var _Procedure:string;
 begin
-  if (_Procedure:=getGlobalName(@vProcedure))<>'' then
+  _Procedure:=getGlobalName(@vProcedure);
+  if _Procedure<>'' then
   begin
-    writeLN(ogl.uptime(),' | ',ogl.script(),' > ',_Procedure,'()');
+    if vDebug then
+      writeLN(ogl.uptime(),' | ',ogl.script(),' > tOGL.call(@',_Procedure,',',vDebug,')');
     vProcedure();
     exit(true);
   end;
@@ -29,7 +31,7 @@ begin
     for _CharacterIndex to _CharacterCount-1 do
     begin
       ogl.cache.character[_CharacterIndex]:=_CharacterPointer^;
-      _CharacterPointer+=ogl.size.character;
+      _CharacterPointer+=sizeOf(tCharacter);
     end;
   end;
   exit(self.characters);
@@ -92,7 +94,7 @@ begin
     for _ModelIndex to _ModelCount-1 do
     begin
       ogl.cache.model[_ModelIndex]:=_ModelPointer^;
-      _ModelPointer+=ogl.size.model;
+      _ModelPointer+=sizeOf(tModel);
     end;
   end;
   exit(self.models);
@@ -125,7 +127,7 @@ begin
     for _TextureIndex to _TextureCount-1 do
     begin
       ogl.cache.texture[_TextureIndex]:=_TexturePointer^;
-      _TexturePointer+=ogl.size.texture;
+      _TexturePointer+=sizeOf(tTexture);
     end;
   end;
   exit(self.textures);

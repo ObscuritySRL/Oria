@@ -2,8 +2,28 @@
   TPOINT
 *)
 
+function tPoint.debug(vClear:boolean=false):tPoint;
+var
+  _Debug,
+    _Name:string;
+begin
+  if vClear then
+    clearDebug();
+  _Name:=getGlobalName(@self);
+  if _Name='' then
+    _Name:='tPoint';
+  writeLN(ogl.uptime()+' | '+ogl.script()+' > '+_Name+' > '+toStr(self));
+  exit(self);
+end;
+
+function tPoint.defined():boolean;
+begin exit(self.unequal([]));end;
+
 function tPoint.distance(vPoint:tPoint):integer;
 begin exit(round(sqrt(pow(self.x-vPoint.x,2)+pow(self.y-vPoint.y,2))));end;
+
+function tPoint.equals(vPoint:tPoint):boolean;
+begin exit(compareMem(@self,@vPoint,sizeOf(tPoint)));end;
 
 function tPoint.inside(vBox:tBox):boolean;
 begin exit(pointInBox(self,vBox));end;
@@ -24,13 +44,15 @@ begin
 end;
 
 procedure tPoint.mouse(vAction:string);
+var _Mouse:tMouse;
 begin
+  _Mouse:=getGlobalPtr('mouse');{Prevents strange access violations}
   case lowercase(vAction) of
-    'down':       ogl.mouse.down(self);
-    'left':       ogl.mouse.left(self);
-    'move':       ogl.mouse.move(self);
-    'right':      ogl.mouse.right(self);
-    'up':         ogl.mouse.up(self);
+    'down': _Mouse.down(self);
+    'left': _Mouse.left(self);
+    'move': _Mouse.move(self);
+    'right':_Mouse.right(self);
+    'up':   _Mouse.up(self);
   end;
 end;
 
@@ -43,3 +65,6 @@ begin
     else  exit(-1);
   end;
 end;
+
+function tPoint.unequal(vPoint:tPoint):boolean;
+begin exit(not self.equals(vPoint));end;

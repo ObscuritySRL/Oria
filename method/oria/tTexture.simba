@@ -2,19 +2,40 @@
   TTEXTURE
 *)
 
+function tTexture.closest(vCharacters:tCharacters):tCharacters;
+begin exit(vCharacters.closest(self));end;
+
+function tTexture.closest(vModels:tModels):tModels;overload;
+begin exit(vModels.closest(self));end;
+
+function tTexture.closest(vPoints:tPointArray):tPointArray;overload;
+begin exit(vPoints.closest(self));end;
+
+function tTexture.closest(vTextures:tTextures):tTextures;overload;
+begin exit(vTextures.closest(self));end;
+
 function tTexture.debug(vClear:boolean=false):tTexture;
+var
+  _Debug,
+    _Name:string;
 begin
   if vClear then
     clearDebug();
-  writeLN(ogl.uptime(),' | ',ogl.script(),' > tTexture > ',self);
+  _Name:=getGlobalName(@self);
+  if _Name='' then
+    _Name:='tTexture';
+  writeLN(ogl.uptime()+' | '+ogl.script()+' > '+_Name+' > '+toStr(self));
   exit(self);
 end;
+
+function tTexture.defined():boolean;
+begin exit(self.unequal([]));end;
 
 function tTexture.distance(vPoint:tPoint):integer;
 begin exit(self.position.distance(vPoint));end;
 
 function tTexture.equals(vTexture:tTexture):boolean;
-begin exit(compareMem(@self,@vTexture,ogl.size.texture));end;
+begin exit(compareMem(@self,@vTexture,sizeOf(tTexture)));end;
 
 function tTexture.inside(vBox:tBox;vBounds:boolean=false):boolean;
 begin
@@ -36,7 +57,7 @@ procedure tTexture.mouse(vAction:string);
 var
   _Position:tPoint;
 begin
-  _Position:=ogl.mouse.position();
+  _Position:=tMouse.position();
   if _Position.inside(self.bounds) and (random(50)<>0) then
     _Position.mouse(vAction)
   else
@@ -55,6 +76,7 @@ begin
     'color':        exit(ptrUInt(@_Texture^.color));
     'height':       exit(ptrUInt(@_Texture^.height));
     'id':           exit(ptrUInt(@_Texture^.id));
+    'opacity':      exit(ptrUInt(@_Texture^.opacity));
     'position':     exit(ptrUInt(@_Texture^.position));
       'position.x': exit(ptrUInt(@_Texture^.position.x));
       'position.y': exit(ptrUInt(@_Texture^.position.y));
@@ -65,3 +87,6 @@ end;
 
 function tTexture.point():tPoint;
 begin exit(self.bounds.point());end;
+
+function tTexture.unequal(vTexture:tTexture):boolean;
+begin exit(not self.equals(vTexture));end;

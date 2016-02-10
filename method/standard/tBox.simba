@@ -2,8 +2,28 @@
   TBOX
 *)
 
+function tBox.debug(vClear:boolean=false):tBox;
+var
+  _Debug,
+    _Name:string;
+begin
+  if vClear then
+    clearDebug();
+  _Name:=getGlobalName(@self);
+  if _Name='' then
+    _Name:='tBox';
+  writeLN(ogl.uptime()+' | '+ogl.script()+' > '+_Name+' > '+toStr(self));
+  exit(self);
+end;
+
+function tBox.defined():boolean;
+begin exit(self.unequal([]));end;
+
 function tBox.equals(vBox:tBox):boolean;
 begin exit(compareMem(@self,@vBox,sizeOf(tBox)));end;
+
+function tBox.fix():tBox;
+begin exit(result:=[min(self.x1,self.x2),min(self.y1,self.y2),max(self.x1,self.x2),max(self.y1,self.y2)]);end;
 
 function tBox.offset(vProperty:string):integer;
 var _Box:^tBox;
@@ -18,13 +38,15 @@ begin
 end;
 
 procedure tBox.mouse(vAction:string);
+var _Mouse:tMouse;
 begin
+  _Mouse:=getGlobalPtr('mouse');{Prevents strange access violations}
   case lowercase(vAction) of
-    'down':       ogl.mouse.down(self);
-    'left':       ogl.mouse.left(self);
-    'move':       ogl.mouse.move(self);
-    'right':      ogl.mouse.right(self);
-    'up':         ogl.mouse.up(self);
+    'down': _Mouse.down(self);
+    'left': _Mouse.left(self);
+    'move': _Mouse.move(self);
+    'right':_Mouse.right(self);
+    'up':   _Mouse.up(self);
   end;
 end;
 
@@ -48,3 +70,6 @@ begin exit(self.transform(vX,vY,vX,vY));end;
 
 function tBox.transform(vX1,vY1,vX2,vY2:integer):tBox;overload;
 begin exit(tBox([self.x1+vX1,self.y1+vY1,self.x2+vX2,self.y2+vY2]));end;
+
+function tBox.unequal(vBox:tBox):boolean;
+begin exit(not self.equals(vBox));end;

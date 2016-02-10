@@ -2,19 +2,40 @@
   TCHARACTER
 *)
 
+function tCharacter.closest(vCharacters:tCharacters):tCharacters;
+begin exit(vCharacters.closest(self));end;
+
+function tCharacter.closest(vModels:tModels):tModels;overload;
+begin exit(vModels.closest(self));end;
+
+function tCharacter.closest(vPoints:tPointArray):tPointArray;overload;
+begin exit(vPoints.closest(self));end;
+
+function tCharacter.closest(vTextures:tTextures):tTextures;overload;
+begin exit(vTextures.closest(self));end;
+
 function tCharacter.debug(vClear:boolean=false):tCharacter;
+var
+  _Debug,
+    _Name:string;
 begin
   if vClear then
     clearDebug();
-  writeLN(ogl.uptime(),' | ',ogl.script(),' > tCharacter > ',self);
+  _Name:=getGlobalName(@self);
+  if _Name='' then
+    _Name:='tBox';
+  writeLN(tOGL.uptime()+' | '+tOGL.script()+' > '+_Name+' > '+toStr(self));
   exit(self);
 end;
+
+function tCharacter.defined():boolean;
+begin exit(self.unequal([]));end;
 
 function tCharacter.distance(vPoint:tPoint):integer;
 begin exit(self.position.distance(vPoint));end;
 
 function tCharacter.equals(vCharacter:tCharacter):boolean;
-begin exit(compareMem(@self,@vCharacter,ogl.size.character));end;
+begin exit(compareMem(@self,@vCharacter,sizeOf(tCharacter)));end;
 
 function tCharacter.inside(vBox:tBox;vBounds:boolean=false):boolean;
 begin
@@ -58,3 +79,6 @@ end;
 
 function tCharacter.point():tPoint;
 begin exit(self.bounds.point());end;
+
+function tCharacter.unequal(vCharacter:tCharacter):boolean;
+begin exit(not self.equals(vCharacter));end;

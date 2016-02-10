@@ -1,0 +1,20 @@
+(*
+  MATH
+*)
+
+function normal(vMin,vMax:int32):integer;
+begin exit(round((vMin+vMax)/2+((vMax-vMin)/2)*((randomE()+randomE()+randomE()+randomE()+randomE()+randomE()+randomE()+randomE()+randomE()+randomE()+randomE()+randomE()-6)/6)));end;
+
+function range(vMin,vMax:integer):tIntegerArray;
+var
+  _Index,
+    _Maximum,
+    _Minimum:integer;
+begin
+  _Minimum:=min(vMin,vMax);
+  _Maximum:=max(vMin,vMax);
+  setLength(result,_Maximum-_Minimum+1);
+  for _Index to _Maximum-_Minimum do
+    result[_Index]:=_Minimum+_Index;
+end;
+

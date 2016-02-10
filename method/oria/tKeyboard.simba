@@ -125,9 +125,7 @@ procedure tKeyboard.press(vKey:variant;vOption:variant='');
 var
   _Index,
     _Key,
-    _Option,
-    _Speed:integer;
-  _KeyPress:procedure(vWord:word);
+    _Option:integer;
 begin
   case varType(vKey) of
     varByte,varInteger:
@@ -140,14 +138,21 @@ begin
             if (_Option:=strToIntDef(vOption,-1))=-1 then
             begin
               case lowercase(vOption) of
-                '':_KeyPress:=@pressKey;
-                'down':_KeyPress:=@keyDown;
-                'up':_KeyPress:=@keyUp;
-              end;
-              if @_KeyPress<>nil then
-              begin
-                _KeyPress(vKey);
-                wait(self.speed.normal());
+                '':
+                begin
+                  self.press(vKey,'down');
+                  self.press(vKey,'up');
+                end;  //_KeyPress:=@pressKey;
+                'down':
+                begin
+                  keyDown(vKey);
+                  wait(normal(0,200));
+                end;
+                'up':
+                begin
+                  keyUp(vKey);
+                  wait(normal(0,random(50,100)));
+                end;
               end;
             end
             else

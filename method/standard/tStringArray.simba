@@ -4,8 +4,8 @@
 
 function tStringArray.concat(vStrings:tStringArray):tStringArray;
 begin
-  insert(self,vStrings);
-  exit(vStrings);
+  insert(vStrings,self);
+  exit(self);
 end;
 
 function tStringArray.contains(vString:string):boolean;
@@ -14,6 +14,35 @@ begin
   for _Index to high(self) do
     if self[_Index]=vString then
       exit(true)
+end;
+
+function tStringArray.debug(vClear:boolean=false):tStringArray;
+var
+  _Debug,
+    _Message,
+    _Name:string;
+  _Index:integer;
+begin
+  if vClear then
+    clearDebug();
+  _Name:=getGlobalName(@self);
+  if _Name='' then
+    _Name:='tStringArray';
+  if length(self) then
+  begin
+    _Debug:=ogl.uptime()+' | '+ogl.script()+' > '+_Name+'[';
+    _Message:=_Debug+'0..'+toStr(high(self))+']'+#13#10;
+    for _Index to high(self) do
+      if self[_Index].nonempty() then
+        _Message+=_Debug+toStr(_Index)+'][1..'+toStr(length(self[_Index]))+'] > '''+self[_Index]+''''+#13#10
+      else
+        _Message+=_Debug+toStr(_Index)+'][]'+#13#10;
+   _Message:=trim(_Message);
+  end
+  else
+    _Message:=ogl.uptime()+' | '+ogl.script()+' > '+_Name+'[]';
+  writeLN(_Message);
+  exit(self);
 end;
 
 function tStringArray.empty():boolean;
@@ -66,12 +95,16 @@ begin
     exit(self[high(self)]);
 end;
 
+function tStringArray.nonempty():boolean;
+begin exit(not self.empty())end;
+
 function tStringArray.pop():string;
 var _High:integer;
 begin
   if not self.empty() then
   begin
-    result:=self[_High:=high(self)];
+    _High:=high(self);
+    result:=self[_High];
     setLength(self,_High);
     exit(result);
   end;
@@ -99,10 +132,47 @@ begin
   exit(result);
 end;
 
-function tStringArray.shuffle():tStringArray;
+function tStringArray.shift():string;
+begin exit(self.splice(0,1).eq(0));end;
+
+function tStringArray.shuffle(vOverwrite:boolean=false):tStringArray;
 var _Index:integer;
 begin
-  for _Index:=high(result:=self) downto 0 do
+  result:=self;
+  for _Index:=high(result) downto 0 do
     system.swap(result[_Index],result[random(_Index+1)]);
+  if vOverwrite then
+    self:=result;
   exit(result);
+end;
+
+function tStringArray.splice(vIndex,vCount:integer):tStringArray;
+var
+  _High,
+    _ResultIndex,
+    _StringIndex:integer;
+begin
+  _High:=high(self);
+  if (vIndex<=_High) and (vCount>0) then
+  begin
+    setLength(result,length(self));
+    for _StringIndex to _High do
+    begin
+      if (_StringIndex>=vIndex) and (_ResultIndex<vCount) then
+      begin
+        result[_ResultIndex]:=self[_StringIndex];
+        _ResultIndex+=1;
+      end
+      else
+        self[_StringIndex-_ResultIndex]:=self[_StringIndex];
+    end;
+    setLength(result,_ResultIndex);
+    setLength(self,_StringIndex-_ResultIndex);
+  end;
+end;
+
+function tStringArray.unshift(vString:string):integer;
+begin
+  insert([vString],self);
+  exit(length(self));
 end;

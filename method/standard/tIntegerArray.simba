@@ -4,8 +4,8 @@
 
 function tIntegerArray.concat(vIntegers:tIntegerArray):tIntegerArray;
 begin
-  insert(self,vIntegers);
-  exit(vIntegers);
+  insert(vIntegers,self);
+  exit(self);
 end;
 
 function tIntegerArray.contains(vInteger:integer):boolean;
@@ -14,6 +14,32 @@ begin
   for _Index to high(self) do
     if self[_Index]=vInteger then
       exit(true);
+end;
+
+function tIntegerArray.debug(vClear:boolean=false):tIntegerArray;
+var
+  _Debug,
+    _Message,
+    _Name:string;
+  _Index:integer;
+begin
+  if vClear then
+    clearDebug();
+  _Name:=getGlobalName(@self);
+  if _Name='' then
+    _Name:='tIntegerArray';
+  if length(self) then
+  begin
+    _Debug:=ogl.uptime()+' | '+ogl.script()+' > '+_Name+'[';
+    _Message:=_Debug+'0..'+toStr(high(self))+']'+#13#10;
+    for _Index to high(self) do
+      _Message+=_Debug+toStr(_Index)+'] > '+toStr(self[_Index])+#13#10;
+   _Message:=trim(_Message);
+  end
+  else
+    _Message:=ogl.uptime()+' | '+ogl.script()+' > '+_Name+'[]';
+  writeLN(_Message);
+  exit(self);
 end;
 
 function tIntegerArray.empty():boolean;
@@ -67,12 +93,22 @@ end;
 function tIntegerArray.indexes():integer;
 begin exit(length(self));end;
 
+function tIntegerArray.last():integer;
+begin
+  if not self.empty() then
+    exit(self[high(self)]);
+end;
+
+function tIntegerArray.nonempty():boolean;
+begin exit(not self.empty())end;
+
 function tIntegerArray.pop():integer;
 var _High:integer;
 begin
   if not self.empty() then
   begin
-    result:=self[_High:=high(self)];
+    _High:=high(self);
+    result:=self[_High];
     setLength(self,_High);
     exit(result);
   end;
@@ -95,25 +131,6 @@ begin
   exit((self.indexes()>1) and (_Index=high(self)));
 end;
 
-function tIntegerArray.range(vMinimum,vMaximum:integer):tIntegerArray;overload;
-var
-  _Index,
-    _Maximum,
-    _Minimum:integer;
-begin
-  _Minimum:=min(vMinimum,vMaximum);
-  _Maximum:=max(vMinimum,vMaximum);
-  setLength(result,_Maximum-_Minimum+1);
-  for _Index to _Maximum-_Minimum do
-    result[_Index]:=_Minimum+_Index;
-end;
-
-function tIntegerArray.last():integer;
-begin
-  if not self.empty() then
-    exit(self[high(self)]);
-end;
-
 function tIntegerArray.reverse():tIntegerArray;
 var
   _Decrease,
@@ -128,10 +145,47 @@ begin
   exit(result);
 end;
 
-function tIntegerArray.shuffle():tIntegerArray;
+function tIntegerArray.shift():integer;
+begin exit(self.splice(0,1).eq(0));end;
+
+function tIntegerArray.shuffle(vOverwrite:boolean=false):tIntegerArray;
 var _Index:integer;
 begin
-  for _Index:=high(result:=self) downto 0 do
+  result:=self;
+  for _Index:=high(result) downto 0 do
     system.swap(result[_Index],result[random(_Index+1)]);
+  if vOverwrite then
+    self:=result;
   exit(result);
+end;
+
+function tIntegerArray.splice(vIndex,vCount:integer):tIntegerArray;
+var
+  _High,
+    _IntegerIndex,
+    _ResultIndex:integer;
+begin
+  _High:=high(self);
+  if (vIndex<=_High) and (vCount>0) then
+  begin
+    setLength(result,length(self));
+    for _IntegerIndex to _High do
+    begin
+      if (_IntegerIndex>=vIndex) and (_ResultIndex<vCount) then
+      begin
+        result[_ResultIndex]:=self[_IntegerIndex];
+        _ResultIndex+=1;
+      end
+      else
+        self[_IntegerIndex-_ResultIndex]:=self[_IntegerIndex];
+    end;
+    setLength(result,_ResultIndex);
+    setLength(self,_IntegerIndex-_ResultIndex);
+  end;
+end;
+
+function tIntegerArray.unshift(vInteger:integer):integer;
+begin
+  insert([vInteger],self);
+  exit(length(self));
 end;
